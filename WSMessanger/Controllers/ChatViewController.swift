@@ -13,21 +13,45 @@ import InputBarAccessoryView
 class ChatViewController: MessagesViewController {
     
     // MARK: Variables
-//    var messageList: [
+    var messageList: [Message] = []
+ 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        configureMessageCollectionView()
+        configureMessageInputBar()
+        
+    }
     
+    func configureMessageCollectionView() {
+        
+        messagesCollectionView.messagesDataSource = self
+        messagesCollectionView.messageCellDelegate = self
+    }
     
+    func configureMessageInputBar() {
+        
+    }
 }
 
-//extension ChatViewController: MessagesDataSource {
-//    func currentSender() -> SenderType {
-//        return
-//    }
-//
-//    func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
-//        <#code#>
-//    }
-//
-//    func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
-//        <#code#>
-//    }
-//}
+// MARK: Message Datasource
+extension ChatViewController: MessagesDataSource {
+    func currentSender() -> SenderType {
+        return User()
+    }
+
+    func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
+//        return messageList[indexPath.section]
+        return messageList[indexPath.section]
+    }
+
+    func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
+        return self.messageList.count
+//        return 0
+    }
+}
+
+// MARK: Message cell delegate
+extension ChatViewController: MessageCellDelegate {
+    
+}

@@ -7,8 +7,13 @@
 //
 
 import Foundation
+import MessageKit
 
-class User {
-    var id: String = ""
-    var name: String = ""
+class User: SenderType {
+    var senderId: String = ""
+    
+    var displayName: String = ""
+//
+//    var id: String = ""
+//    var name: String = ""
 }

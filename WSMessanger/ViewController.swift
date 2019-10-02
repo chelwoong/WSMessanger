@@ -9,7 +9,7 @@
 import UIKit
 import MessageKit
 
-class ViewController: MessagesViewController {
+class ViewController: ChatViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
