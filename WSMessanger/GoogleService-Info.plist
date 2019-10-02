@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>774240135927-7t6rq823993i78r4h59nb1b3l3h4mt66.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.774240135927-7t6rq823993i78r4h59nb1b3l3h4mt66</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAyKO10KOPcszon6FRq01qtHqHs5QklGHg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>774240135927</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.ttgo.WSMessanger</string>
+	<key>PROJECT_ID</key>
+	<string>wsmessanger</string>
+	<key>STORAGE_BUCKET</key>
+	<string>wsmessanger.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:774240135927:ios:1e6d1e5cc6fad1030141f2</string>
+	<key>DATABASE_URL</key>
+	<string>https://wsmessanger.firebaseio.com</string>
+</dict>
+</plist>
