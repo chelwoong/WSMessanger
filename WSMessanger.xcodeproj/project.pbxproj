@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C45CBF4234600A200E7332D /* CustomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C45CBF3234600A200E7332D /* CustomCell.swift */; };
+		4C45CBF6234600AD00E7332D /* TableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C45CBF5234600AD00E7332D /* TableViewCell.swift */; };
 		6ED7DEA02342DE97004F5B4F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DE9F2342DE97004F5B4F /* AppDelegate.swift */; };
-		6ED7DEA22342DE97004F5B4F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DEA12342DE97004F5B4F /* ViewController.swift */; };
+		6ED7DEA22342DE97004F5B4F /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DEA12342DE97004F5B4F /* MainViewController.swift */; };
 		6ED7DEA72342DE98004F5B4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6ED7DEA62342DE98004F5B4F /* Assets.xcassets */; };
 		6ED7DEAA2342DE98004F5B4F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6ED7DEA82342DE98004F5B4F /* LaunchScreen.storyboard */; };
 		6ED7DEB22342E9EC004F5B4F /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DEB12342E9EC004F5B4F /* ChatViewController.swift */; };
@@ -22,9 +24,11 @@
 /* Begin PBXFileReference section */
 		31E8C45F03C112D5F8B2F5B1 /* Pods-WSMessanger.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WSMessanger.debug.xcconfig"; path = "Target Support Files/Pods-WSMessanger/Pods-WSMessanger.debug.xcconfig"; sourceTree = "<group>"; };
 		49BFF8C409FF735BCE07A083 /* Pods-WSMessanger.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WSMessanger.release.xcconfig"; path = "Target Support Files/Pods-WSMessanger/Pods-WSMessanger.release.xcconfig"; sourceTree = "<group>"; };
+		4C45CBF3234600A200E7332D /* CustomCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCell.swift; sourceTree = "<group>"; };
+		4C45CBF5234600AD00E7332D /* TableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewCell.swift; sourceTree = "<group>"; };
 		6ED7DE9C2342DE97004F5B4F /* WSMessanger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WSMessanger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6ED7DE9F2342DE97004F5B4F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		6ED7DEA12342DE97004F5B4F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		6ED7DEA12342DE97004F5B4F /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		6ED7DEA62342DE98004F5B4F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6ED7DEA92342DE98004F5B4F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6ED7DEAB2342DE98004F5B4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -48,6 +52,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4C45CBF22346009200E7332D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				4C45CBF3234600A200E7332D /* CustomCell.swift */,
+				4C45CBF5234600AD00E7332D /* TableViewCell.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		6ED7DE932342DE97004F5B4F = {
 			isa = PBXGroup;
 			children = (
@@ -69,10 +82,10 @@
 		6ED7DE9E2342DE97004F5B4F /* WSMessanger */ = {
 			isa = PBXGroup;
 			children = (
+				4C45CBF22346009200E7332D /* Views */,
 				6ED7DEDE23449124004F5B4F /* Controllers */,
 				6ED7DED7234485D4004F5B4F /* Models */,
 				6ED7DE9F2342DE97004F5B4F /* AppDelegate.swift */,
-				6ED7DEA12342DE97004F5B4F /* ViewController.swift */,
 				6ED7DEA62342DE98004F5B4F /* Assets.xcassets */,
 				6ED7DEA82342DE98004F5B4F /* LaunchScreen.storyboard */,
 				6ED7DEAB2342DE98004F5B4F /* Info.plist */,
@@ -95,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				6ED7DEB12342E9EC004F5B4F /* ChatViewController.swift */,
+				6ED7DEA12342DE97004F5B4F /* MainViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -232,10 +246,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				6ED7DEDD2344860C004F5B4F /* Channel.swift in Sources */,
-				6ED7DEA22342DE97004F5B4F /* ViewController.swift in Sources */,
+				4C45CBF6234600AD00E7332D /* TableViewCell.swift in Sources */,
+				6ED7DEA22342DE97004F5B4F /* MainViewController.swift in Sources */,
 				6ED7DEB42342EAB1004F5B4F /* Message.swift in Sources */,
 				6ED7DEB22342E9EC004F5B4F /* ChatViewController.swift in Sources */,
 				6ED7DED9234485FD004F5B4F /* User.swift in Sources */,
+				4C45CBF4234600A200E7332D /* CustomCell.swift in Sources */,
 				6ED7DEA02342DE97004F5B4F /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -376,7 +392,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = N9SYCQW669;
+				DEVELOPMENT_TEAM = N23K7ZS482;
 				INFOPLIST_FILE = WSMessanger/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -395,7 +411,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = N9SYCQW669;
+				DEVELOPMENT_TEAM = N23K7ZS482;
 				INFOPLIST_FILE = WSMessanger/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
