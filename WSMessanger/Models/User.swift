@@ -9,7 +9,7 @@
 import Foundation
 import MessageKit
 
-class User: SenderType {
+struct User: SenderType, Equatable {
     
     public let senderId: String
     

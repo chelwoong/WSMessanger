@@ -10,10 +10,13 @@ import UIKit
 import MessageKit
 import InputBarAccessoryView
 
-class ChatViewController: MessagesViewController {
+class ChatViewController: MessagesViewController, MessagesDataSource {
     
     // MARK: Variables
-    var messageList: [MessageType] = []
+    var messageList: [Message] = [
+        Message.init(text: "TESTTTTTT!", user: SampleData.shared.currentSender, messageId: UUID().uuidString, date: Date()),
+        Message.init(text: "TESTTTTTT!", user: User(senderId: "123123", displayName: "Woongs"), messageId: UUID().uuidString, date: Date())
+    ]
     
     let refreshControl = UIRefreshControl()
     
@@ -33,6 +36,7 @@ class ChatViewController: MessagesViewController {
     
     func configureMessageCollectionView() {
         
+        
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messageCellDelegate = self
         
@@ -46,7 +50,7 @@ class ChatViewController: MessagesViewController {
     
     // MARK: - Helpers
     
-    func insertMessage(_ message: MessageType) {
+    func insertMessage(_ message: Message) {
         print("input msg: \(message.kind)")
         
         messageList.append(message)
@@ -57,8 +61,7 @@ class ChatViewController: MessagesViewController {
                 messagesCollectionView.reloadSections([messageList.count - 2])
             }
         }) { [weak self] _ in
-
-            /// What is mean?!!
+            /// scroll to bottom when last message visible
             if self?.isLastSectionVisible() == true {
                 self?.messagesCollectionView.scrollToBottom(animated: true)
             }
@@ -73,14 +76,14 @@ class ChatViewController: MessagesViewController {
         
         return messagesCollectionView.indexPathsForVisibleItems.contains(lastIndexPath)
     }
-}
-
-// MARK: - Message Datasource
-extension ChatViewController: MessagesDataSource {
     
-    /// essential for cell
+    // MARK: - Message Datasource
+    
+    //// essential for cell
+    /// it is necessary for control the message sent
     func currentSender() -> SenderType {
-        return Sender(id: "any_unique_id", displayName: "Steven11")
+        return SampleData.shared.currentSender
+//        return User(senderId: "asdf", displayName: "woongs")
     }
     
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
@@ -109,17 +112,26 @@ extension ChatViewController: MessagesDataSource {
     
     /// 이름
     func messageTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
-        let name = message.sender.displayName
-        return NSAttributedString(string: name, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption1)])
+        
+        // 상대방 아이디만 보이기
+        if !isFromCurrentSender(message: message) {
+            let name = message.sender.displayName
+            return NSAttributedString(string: name, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption1)])
+        }
+        return nil
+        
     }
     
     /// 날짜
     func messageBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
         
+        
         let dateString = formatter.string(from: message.sentDate)
         return NSAttributedString(string: dateString, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2)])
     }
 }
+
+
 
 // MARK: - MessageCellDelegate
 
@@ -150,6 +162,7 @@ extension ChatViewController: MessageCellDelegate {
     }
     
     /// for Audio Message cell
+    
 //    func didTapPlayButton(in cell: AudioMessageCell) {
 //        guard let indexPath = messagesCollectionView.indexPath(for: cell),
 //            let message = messagesCollectionView.messagesDataSource?.messageForItem(at: indexPath, in: messagesCollectionView) else {
