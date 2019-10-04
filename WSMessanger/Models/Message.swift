@@ -10,22 +10,24 @@ import MessageKit
 
 struct Message: MessageType {
     
-    
-    var id: String = ""
-    var content: String = ""
-    var sentDate: Date
-    var sender: SenderType
-    var messageId: String = ""
-    var kind: MessageKind
-//    let sender: Sender
-//    var txState: String = ""
-//    var sequence: String = ""
-    
-    init(id: String, content: String, date: Date, sender: Sender, kind: MessageKind) {
-        self.id = id
-        self.content = content
-        self.sentDate = date
-        self.sender = sender
-        self.kind = kind
+    var messageId: String
+    var sender: SenderType {
+        return user
     }
+    var sentDate: Date
+    var kind: MessageKind   // text, ...
+    
+    var user: User
+    
+    private init(kind: MessageKind, user: User, messageId: String, date: Date) {
+        self.kind = kind
+        self.user = user
+        self.messageId = messageId
+        self.sentDate = date
+    }
+    
+    init(text: String, user: User, messageId: String, date: Date) {
+        self.init(kind: .text(text), user: user, messageId: messageId, date: date)
+    }
+    
 }

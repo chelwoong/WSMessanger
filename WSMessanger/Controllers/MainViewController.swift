@@ -29,9 +29,9 @@ class MainViewController: ChatViewController {
 
 extension MainViewController: MessagesDisplayDelegate {
     
-    func backgroundColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
-        return .orange
-    }
+//    func backgroundColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
+//        return .orange
+//    }
     
     // MARK: - Text Messages
     
@@ -48,6 +48,25 @@ extension MainViewController: MessagesDisplayDelegate {
     
     func enabledDetectors(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> [DetectorType] {
         return [.url, .address, .phoneNumber, .date, .transitInformation, .mention, .hashtag]
+    }
+    
+    // MARK: - All Messages
+    
+    func backgroundColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
+        return isFromCurrentSender(message: message) ? .primaryColor : UIColor(red: 230/255, green: 230/255, blue: 230/255, alpha: 1)
+    }
+    
+    /// 메세지 말풍선 꼬리 달기
+    func messageStyle(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageStyle {
+        
+        let tail: MessageStyle.TailCorner = isFromCurrentSender(message: message) ? .bottomRight : .bottomLeft
+        return .bubbleTail(tail, .curved)
+    }
+    
+    func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
+        /// add avatar
+//        let avatar = SampleData.shared.getAvatarFor(sender: message.sender)
+//        avatarView.set(avatar: avatar)
     }
 }
 

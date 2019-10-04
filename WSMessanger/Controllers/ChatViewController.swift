@@ -13,8 +13,15 @@ import InputBarAccessoryView
 class ChatViewController: MessagesViewController {
     
     // MARK: Variables
-    let sender = Sender(id: "any_unique_id", displayName: "Steven")
-    let messages: [MessageType] = []
+    var messageList: [MessageType] = []
+    
+    let refreshControl = UIRefreshControl()
+    
+    let formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
+    }()
  
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,8 +34,7 @@ class ChatViewController: MessagesViewController {
     func configureMessageCollectionView() {
         
         messagesCollectionView.messagesDataSource = self
-//        messagesCollectionView.messagesLayoutDelegate = self
-//        messagesCollectionView.messagesDisplayDelegate = self
+        messagesCollectionView.messageCellDelegate = self
         
         
     }
@@ -37,21 +43,154 @@ class ChatViewController: MessagesViewController {
         messageInputBar.delegate = self
         
     }
+    
+    // MARK: - Helpers
+    
+    func insertMessage(_ message: MessageType) {
+        print("input msg: \(message.kind)")
+        
+        messageList.append(message)
+        
+        messagesCollectionView.performBatchUpdates({
+            messagesCollectionView.insertSections([messageList.count - 1])
+            if messageList.count >= 2 {
+                messagesCollectionView.reloadSections([messageList.count - 2])
+            }
+        }) { [weak self] _ in
+
+            /// What is mean?!!
+            if self?.isLastSectionVisible() == true {
+                self?.messagesCollectionView.scrollToBottom(animated: true)
+            }
+        }
+    }
+    
+    func isLastSectionVisible() -> Bool {
+        
+        guard !messageList.isEmpty else { return false }
+        
+        let lastIndexPath = IndexPath(item: 0, section: messageList.count - 1)
+        
+        return messagesCollectionView.indexPathsForVisibleItems.contains(lastIndexPath)
+    }
 }
 
 // MARK: - Message Datasource
 extension ChatViewController: MessagesDataSource {
+    
+    /// essential for cell
     func currentSender() -> SenderType {
-        return Sender(id: "any_unique_id", displayName: "Steven")
+        return Sender(id: "any_unique_id", displayName: "Steven11")
     }
     
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
-        return messages.count
+        return messageList.count
     }
     
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
-        return messages[indexPath.section]
+        return messageList[indexPath.section]
     }
+    
+    //// optional for name, date, ...
+    ///
+    /// 메세지 3개마다 날짜 표시
+    func cellTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+        if indexPath.section % 3 == 0 {
+            return NSAttributedString(string: MessageKitDateFormatter.shared.string(from: message.sentDate), attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
+        }
+        return nil
+    }
+    
+    /// 읽음
+    func cellBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+        
+        return NSAttributedString(string: "Read", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
+    }
+    
+    /// 이름
+    func messageTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+        let name = message.sender.displayName
+        return NSAttributedString(string: name, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption1)])
+    }
+    
+    /// 날짜
+    func messageBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+        
+        let dateString = formatter.string(from: message.sentDate)
+        return NSAttributedString(string: dateString, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2)])
+    }
+}
+
+// MARK: - MessageCellDelegate
+
+extension ChatViewController: MessageCellDelegate {
+    
+    func didTapAvatar(in cell: MessageCollectionViewCell) {
+        print("Avatar tapped")
+    }
+    
+    func didTapMessage(in cell: MessageCollectionViewCell) {
+        print("Message tapped")
+    }
+    
+    func didTapCellTopLabel(in cell: MessageCollectionViewCell) {
+        print("Top cell label tapped")
+    }
+    
+    func didTapCellBottomLabel(in cell: MessageCollectionViewCell) {
+        print("Bottom cell label tapped")
+    }
+    
+    func didTapMessageTopLabel(in cell: MessageCollectionViewCell) {
+        print("Top message label tapped")
+    }
+    
+    func didTapMessageBottomLabel(in cell: MessageCollectionViewCell) {
+        print("Bottom label tapped")
+    }
+    
+    /// for Audio Message cell
+//    func didTapPlayButton(in cell: AudioMessageCell) {
+//        guard let indexPath = messagesCollectionView.indexPath(for: cell),
+//            let message = messagesCollectionView.messagesDataSource?.messageForItem(at: indexPath, in: messagesCollectionView) else {
+//                print("Failed to identify message when audio cell receive tap gesture")
+//                return
+//        }
+//        guard audioController.state != .stopped else {
+//            // There is no audio sound playing - prepare to start playing for given audio message
+//            audioController.playSound(for: message, in: cell)
+//            return
+//        }
+//        if audioController.playingMessage?.messageId == message.messageId {
+//            // tap occur in the current cell that is playing audio sound
+//            if audioController.state == .playing {
+//                audioController.pauseSound(for: message, in: cell)
+//            } else {
+//                audioController.resumeSound()
+//            }
+//        } else {
+//            // tap occur in a difference cell that the one is currently playing sound. First stop currently playing and start the sound for given message
+//            audioController.stopAnyOngoingPlaying()
+//            audioController.playSound(for: message, in: cell)
+//        }
+//    }
+//
+//    func didStartAudio(in cell: AudioMessageCell) {
+//        print("Did start playing audio sound")
+//    }
+//
+//    func didPauseAudio(in cell: AudioMessageCell) {
+//        print("Did pause audio sound")
+//    }
+//
+//    func didStopAudio(in cell: AudioMessageCell) {
+//        print("Did stop audio sound")
+//    }
+    
+    func didTapAccessoryView(in cell: MessageCollectionViewCell) {
+        print("Accessory view tapped")
+    }
+    
 }
 
 // MARK: - Message Input bar Delegate
@@ -61,7 +200,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
         
         /// input text
         let components = inputBar.inputTextView.components
-        
+        print("components when input Tapped, \(components)")
         // Send button activity animation
         messageInputBar.sendButton.startAnimating()
         messageInputBar.inputTextView.placeholder = "Sending..."
@@ -79,15 +218,17 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
     
     private func insertMessages(_ data: [Any]) {
         for component in data {
-//            let user = SampleData.shared.currentSender
-//            if let str = component as? String {
+            let user: User = SampleData.shared.currentSender
+            if let str = component as? String {
 //                let message = MockMessage(text: str, user: user, messageId: UUID().uuidString, date: Date())
-//                insertMessage(message)
-//            } else if let img = component as? UIImage {
+                let message = Message.init(text: str, user: user, messageId: UUID().uuidString, date: Date())
+                insertMessage(message)
+            }
+//            else if let img = component as? UIImage {
 //                let message = MockMessage(image: img, user: user, messageId: UUID().uuidString, date: Date())
 //                insertMessage(message)
 //            }
-            print(component)
         }
     }
+    
 }
