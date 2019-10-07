@@ -89,8 +89,8 @@
 			children = (
 				6ED7DEE92347077C004F5B4F /* Layout */,
 				4C45CBF22346009200E7332D /* Views */,
-				6ED7DEDE23449124004F5B4F /* Controllers */,
 				6ED7DED7234485D4004F5B4F /* Models */,
+				6ED7DEDE23449124004F5B4F /* Controllers */,
 				6ED7DE9F2342DE97004F5B4F /* AppDelegate.swift */,
 				6ED7DEA62342DE98004F5B4F /* Assets.xcassets */,
 				6ED7DEA82342DE98004F5B4F /* LaunchScreen.storyboard */,

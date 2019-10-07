@@ -16,6 +16,14 @@ class MainViewController: ChatViewController {
     override func configureMessageCollectionView() {
         super.configureMessageCollectionView()
         
+        let layout = messagesCollectionView.collectionViewLayout as? MessagesCollectionViewFlowLayout
+        layout?.sectionInset = UIEdgeInsets(top: 1, left: 8, bottom: 1, right: 8)
+        
+        // Hide the outgoing avatar and adjust the label alignment to line up with the messages
+        layout?.setMessageOutgoingAvatarSize(.zero)
+//        layout?.setMessageOutgoingMessageTopLabelAlignment(LabelAlignment(textAlignment: .right, textInsets: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 8)))
+        layout?.setMessageOutgoingMessageBottomLabelAlignment(LabelAlignment(textAlignment: .right, textInsets: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)))
+        
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
     }
@@ -44,7 +52,19 @@ class MainViewController: ChatViewController {
     }
     
     // MARK: - MessagesDataSource
-    
+    override func messageBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+        
+        let dateString = formatter.string(from: message.sentDate)
+        let bottomString = NSMutableAttributedString(string: dateString, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2)])
+        
+        if !isFromCurrentSender(message: message) {
+            let readAttribute = NSAttributedString(string: " 1", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 12), NSAttributedString.Key.foregroundColor: UIColor.orange])
+            
+            bottomString.append(readAttribute)
+        }
+        
+        return bottomString
+    }
     
 }
 
@@ -126,11 +146,17 @@ extension MainViewController: MessagesDisplayDelegate {
 extension MainViewController: MessagesLayoutDelegate {
 
     func cellTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
+        
         if isTimeLabelVisible(at: indexPath) {
             return 18
         }
         return 0
     }
+    
+    // read 부분
+//    func cellBottomLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
+//        return 17
+//    }
     
     // 
     func messageTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
@@ -139,11 +165,11 @@ extension MainViewController: MessagesLayoutDelegate {
         } else {
             return !isPreviousMessageSameSender(at: indexPath) ? (20 + outgoingAvatarOverlap) : 0
         }
-        return 20
     }
     
     func messageBottomLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
-        return (!isNextMessageSameSender(at: indexPath) && isFromCurrentSender(message: message)) ? 16 : 0
+//        return (!isNextMessageSameSender(at: indexPath) && isFromCurrentSender(message: message)) ? 16 : 0
+        return (!isNextMessageSameSender(at: indexPath) ? 16 : 0)
     }
 
 }

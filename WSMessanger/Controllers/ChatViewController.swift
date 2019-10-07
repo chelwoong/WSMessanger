@@ -15,6 +15,8 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     // MARK: Variables
     var messageList: [Message] = [
         Message.init(text: "TESTTTTTT!", user: SampleData.shared.currentSender, messageId: UUID().uuidString, date: Date()),
+        Message.init(text: "TESTTTTTT!", user: SampleData.shared.currentSender, messageId: UUID().uuidString, date: Date()),
+        Message.init(text: "TESTTTTTT!", user: User(senderId: "123123", displayName: "Woongs"), messageId: UUID().uuidString, date: Date()),
         Message.init(text: "TESTTTTTT!", user: User(senderId: "123123", displayName: "Woongs"), messageId: UUID().uuidString, date: Date())
     ]
     
@@ -35,7 +37,6 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     }
     
     func configureMessageCollectionView() {
-        
         
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messageCellDelegate = self
@@ -105,10 +106,10 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     }
     
     /// 읽음
-    func cellBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
-        
-        return NSAttributedString(string: "Read", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
-    }
+//    func cellBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
+//
+//        return NSAttributedString(string: "Read", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
+//    }
     
     /// 이름
     func messageTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
@@ -125,9 +126,10 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     /// 날짜
     func messageBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
         
-        
         let dateString = formatter.string(from: message.sentDate)
-        return NSAttributedString(string: dateString, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2)])
+        let bottomString = NSMutableAttributedString(string: dateString, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2)])
+        
+        return bottomString
     }
 }
 

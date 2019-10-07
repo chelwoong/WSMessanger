@@ -206,7 +206,7 @@ public extension Array {
     /**
      Shuffle the array in-place using the Fisher-Yates algorithm.
      */
-    public mutating func shuffle() {
+    mutating func shuffle() {
         for i in 0..<(count - 1) {
             let j = Int(arc4random_uniform(UInt32(count - i))) + i
             if j != i {
@@ -221,7 +221,7 @@ public extension Array {
      
      - returns: Returns a shuffled version of the array.
      */
-    public func shuffled() -> [Element] {
+    func shuffled() -> [Element] {
         var list = self
         list.shuffle()
         
@@ -233,7 +233,7 @@ public extension Array {
      - returns: Returns a random element from the array or `nil` if the
      array is empty.
      */
-    public func random() -> Element? {
+    func random() -> Element? {
         return (count > 0) ? self.shuffled()[0] : nil
     }
     
@@ -241,7 +241,7 @@ public extension Array {
      Return a random subset of `cnt` elements from the array.
      - returns: Returns a random subset of `cnt` elements from the array.
      */
-    public func random(_ count: Int = 1) -> [Element] {
+    func random(_ count: Int = 1) -> [Element] {
         let result = shuffled()
         
         return (count > result.count) ? result : Array(result[0..<count])
