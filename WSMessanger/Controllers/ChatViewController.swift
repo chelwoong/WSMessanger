@@ -41,6 +41,8 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messageCellDelegate = self
         
+        messagesCollectionView.addSubview(refreshControl)
+//        refreshControl.addTarget(self, action: <#T##Selector#>, for: <#T##UIControl.Event#>)
         
     }
     
@@ -215,7 +217,9 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
         
         /// input text
         let components = inputBar.inputTextView.components
-        print("components when input Tapped, \(components)")
+        messageInputBar.inputTextView.text = String()
+        messageInputBar.invalidatePlugins()
+        
         // Send button activity animation
         messageInputBar.sendButton.startAnimating()
         messageInputBar.inputTextView.placeholder = "Sending..."
