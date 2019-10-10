@@ -11,6 +11,7 @@ import MessageKit
 
 struct User: SenderType, Equatable {
     
+    
     public let senderId: String
     
     public var id: String {
