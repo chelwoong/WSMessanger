@@ -96,7 +96,7 @@ class ChannelTC: UITableViewController {
             return UITableViewCell()
         }
 
-        cell.cellLabelTitle.text = channels[indexPath.row].name
+        cell.cellLabelTitle.text = channels[indexPath.row].peerName
         cell.cellLabelMessage.text = channels[indexPath.row].lastMsg
         
         cell.cellLabelLastDate.frame = CGRect(x:cell.frame.width-200, y:5, width:190, height:40 )
