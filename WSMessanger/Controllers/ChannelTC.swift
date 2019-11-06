@@ -9,19 +9,35 @@
 import UIKit
 import Firebase
 
-
-
-
 class ChannelTC: UITableViewController {
     
     // MARK: - Variables
     var channels: [Channel] = []
-    let db = Firestore.firestore()
+    private let db = Firestore.firestore()
+    
+    private var currentUser: User?
+    private var peerNumber: String?
     let myId = "woongs@ttgo.com"
+    let peerId = "lanbi@naver.com"
+    
+    private var channelReference: CollectionReference {
+        let email = myId
+        return db.collection(email)
+    }
+    
+    let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return formatter
+    }()
+    
 
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         print("viewDidLoad")
+        let userData = UserData.init()
+        print("Get User:\(userData.account), \(userData.password)")
         
         self.title = "Channels"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(addButtonTapped(sender:)))
@@ -32,15 +48,18 @@ class ChannelTC: UITableViewController {
         
     }
     
-    // MARK: Functions
+    // MARK: - Functions
     
     func observeChannels() {
-        db.collection("channels").whereField("id", isEqualTo: self.myId).getDocuments { (querySnapshot, err) in
+        
+//        let docRef = db.collection(myId)
+        
+        db.collection(myId).getDocuments { (querySnapshot, err) in
             if let err = err {
                 print("Error getting documents: \(err)")
-            }
-            else {
+            } else {
                 for document in querySnapshot!.documents {
+                    print("document: \(document.data())")
                     if let channel = Channel(document: document) {
                         self.channels.append(channel)
                         DispatchQueue.main.async {
@@ -53,22 +72,21 @@ class ChannelTC: UITableViewController {
     }
     
     @objc func addButtonTapped(sender: UIBarButtonItem) {
-        db.collection("channels").document().setData([
-            "id" : "woongs@ttgo.com",
-            "name" : "woongs",
-            "myNumber" : "1234-2134",
-            "peerId" : "2222-2222",
-            "peerName" :  "lanbi",
-            "lastMsg" : "heellooo",
-            "read" : "false",
-            "lastDate" : "112312312"
-            
-        ]) { (err) in
+
+        
+        
+        let newChannelRef = db.collection(myId).document()
+        var channel = Channel(name: "woongs", peerName: "lanbi", myNumber: "1234-2134", peerNumber: "010-1234-1234")
+        channel.id = newChannelRef.documentID
+        
+        newChannelRef.setData(
+                channel.dictionary
+        ) { (err) in
             if let err = err {
                 print("Error writing document: \(err)")
             } else {
                 print("Document successfully written!")
-                
+                self.channels.append(channel)
                 self.tableView.reloadData()
             }
         }
@@ -102,6 +120,7 @@ class ChannelTC: UITableViewController {
         cell.cellLabelLastDate.frame = CGRect(x:cell.frame.width-200, y:5, width:190, height:40 )
         cell.cellLabelLastDate.text = channels[indexPath.row].lastDate
         
+        
         if channels[indexPath.row].read == "false" {
             cell.cellLabelRead.frame = CGRect(x:cell.frame.width-100, y:40, width:90, height:40 )
             cell.cellLabelRead.text = "New"
@@ -112,45 +131,14 @@ class ChannelTC: UITableViewController {
         
         return cell
     }
- 
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.navigationController?.pushViewController(ChatViewController(), animated: true)
-//        present(ChatViewController(), animated: true, completion: nil)
+        
+        let channel = channels[indexPath.row]
+//        guard let currUser =
+        print("channel state: \(channel.read)")
+        let currentUser: User = .init(senderId: myId, displayName: "woongs")
+        let vc = ChatViewController(user: currentUser, channel: channel)
+    
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 }

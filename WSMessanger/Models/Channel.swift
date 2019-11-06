@@ -13,12 +13,34 @@ struct Channel {
     
     var lastDate: String
     var lastMsg: String
-    let id: String?
+    var id: String?
     var myNumber: String
     var peerNumber: String
     var peerName: String
     var name: String
     var read: String
+    
+    var dictionary: [String: Any] {
+        
+        var dic: [String:Any] = {
+            return [
+            "lastDate" : self.lastDate,
+            "lastMsg" : self.lastMsg,
+            "myNumber" : self.myNumber,
+            "peerNumber" : self.peerNumber,
+            "peerName" : self.peerName,
+            "name" : self.name,
+            "read" : self.read
+            ]
+        }()
+        
+        if let id = self.id {
+            dic["id"] = id
+        }
+        
+        return dic
+    }
+    
     
     init(name: String, peerName: String, myNumber: String, peerNumber: String) {
         self.id = ""
@@ -39,6 +61,8 @@ struct Channel {
     
     init?(document: QueryDocumentSnapshot) {
         let data = document.data()
+        id = document.documentID
+        print("\(id)")
         
         if let _name = data["name"] as? String { self.name = _name } else { self.name = "" }
         if let _myNumber = data["myNumber"] as? String { self.myNumber = _myNumber } else { self.myNumber = ""}
@@ -47,10 +71,8 @@ struct Channel {
         if let _lastMsg = data["lastMsg"] as? String { self.lastMsg = _lastMsg } else { self.lastMsg = "" }
         if let _read = data["read"] as? String  { self.read = _read } else { self.read = "" }
         if let _lastDate = data["lastDate"] as? String { self.lastDate = _lastDate } else { self.lastDate = "" }
+        if let _id = data["id"] as? String { self.id = _id } else { self.id = "" }
         
-        id = document.documentID
     }
-    
-    
     
 }

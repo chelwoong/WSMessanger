@@ -9,15 +9,21 @@
 import UIKit
 import MessageKit
 import InputBarAccessoryView
+import Firebase
 
 class ChatViewController: MessagesViewController, MessagesDataSource {
     
     // MARK: Variables
+    private let currentUser: User
+    private let channel: Channel
+    private let db = Firestore.firestore()
+    private var messageListener: ListenerRegistration?
+    
     var messageList: [Message] = [
-        Message.init(text: "TESTTTTTT!", user: SampleData.shared.currentSender, messageId: UUID().uuidString, date: Date()),
-        Message.init(text: "TESTTTTTT!", user: SampleData.shared.currentSender, messageId: UUID().uuidString, date: Date()),
-        Message.init(text: "TESTTTTTT!", user: User(senderId: "123123", displayName: "Woongs"), messageId: UUID().uuidString, date: Date()),
-        Message.init(text: "TESTTTTTT!", user: User(senderId: "123123", displayName: "Woongs"), messageId: UUID().uuidString, date: Date())
+//        Message.init(text: "TESTTTTTT!", user: SampleData.shared.currentSender, messageId: UUID().uuidString, date: Date()),
+//        Message.init(text: "TESTTTTTT!", user: SampleData.shared.currentSender, messageId: UUID().uuidString, date: Date()),
+//        Message.init(text: "TESTTTTTT!", user: User(senderId: "123123", displayName: "Woongs"), messageId: UUID().uuidString, date: Date()),
+//        Message.init(text: "TESTTTTTT!", user: User(senderId: "123123", displayName: "Woongs"), messageId: UUID().uuidString, date: Date())
     ]
     
     let refreshControl = UIRefreshControl()
@@ -30,12 +36,89 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         return formatter
     }()
  
+    // MARK: - LifeCycle
+    
+    init(user: User, channel: Channel) {
+        
+        self.currentUser = user
+        self.channel = channel
+        
+        super.init(nibName: nil, bundle: nil)
+        
+        title = channel.name
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         configureMessageCollectionView()
         configureMessageInputBar()
-        title = "Woongs"
+        getMessage()
+        fetchMessages()
+    }
+    
+    
+    // MARK: - Helpers
+    
+    func getMessage() {
+        guard let channelID = channel.id else {return}
+        let ref = db.collection(currentUser.id).document(channelID).collection("thread")
+        
+        ref.getDocuments { (querySnapshot, err) in
+            if let err = err {
+                print("Error getting documents: \(err)")
+            } else {
+                for document in querySnapshot!.documents {
+                    // document.data() --> [String: Any]
+                    print("\(document.documentID) => \(document.data())")
+                }
+            }
+        }
+    }
+    
+    func fetchMessages() {
+        guard let channelID = channel.id else {return}
+        let ref = db.collection(currentUser.id).document(channelID).collection("thread")
+        messageListener = ref.addSnapshotListener { (documentSnapshot, error) in
+            guard let document = documentSnapshot else {
+                ("Error fetching documemnt: \(error!)")
+                return
+            }
+            
+            document.documentChanges.forEach { (change) in
+                self.handleDocumentChange(change)
+            }
+            
+        }
+    }
+    
+    private func handleDocumentChange(_ change: DocumentChange) {
+        guard let message = Message(document: change.document) else {
+            print("handleDocumentChange \(change.type)")
+            return
+        }
+        
+        switch change.type {
+        case .added:
+            print(".added")
+//            insertNewMessage(message)
+            
+//        case .modified:
+//            print(".modified \(message.txState), sequence\(message.sequence)")
+//            modifyMessage(message)
+//
+//        case .removed:
+//            print(".deleted \(message.sequence)")
+//            deleteMessage(message)
+            
+        default:
+            print(".default")
+            break
+        }
     }
     
     func configureMessageCollectionView() {
@@ -61,13 +144,36 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         
     }
     
-    // MARK: - Helpers
+    
+    private func save(_ message: Message) {
+        
+        var ref: CollectionReference
+        guard let channelId = channel.id else { return }
+        ref = db.collection(currentUser.id).document(channelId).collection("thread")
+        
+        ref.addDocument(data: [
+            "content": message.content,
+            "created": Date()
+        ], completion: { (error) in
+            if let e = error {
+                print("Error sending message: \(e.localizedDescription)")
+                return
+            }
+            else{
+                //문자 전송시 실패를 할 수 있어서 해당 documentID를 다 저장해준다..
+                //어딘가에다가
+//                print("document ID :  \(String(describing: ref?.documentID))")
+            }
+            self.messagesCollectionView.scrollToBottom()
+        })
+    }
     
     func insertMessage(_ message: Message) {
-        print("input msg: \(message.kind)")
+        print("input msg: \(message.kind.self)")
         
+//        self.save(message)
         messageList.append(message)
-        
+        save(message)
         messagesCollectionView.performBatchUpdates({
             messagesCollectionView.insertSections([messageList.count - 1])
             if messageList.count >= 2 {
@@ -110,7 +216,7 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     //// essential for cell
     /// it is necessary for control the message sent
     func currentSender() -> SenderType {
-        return SampleData.shared.currentSender
+        return currentUser
 //        return User(senderId: "asdf", displayName: "woongs")
     }
     
@@ -162,7 +268,11 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
                 NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2),
                 NSAttributedString.Key.foregroundColor: UIColor.orange
             ]
-            let readAttributedString = NSAttributedString(string: " 1", attributes: readAttributes)
+            let readAttributedString = NSAttributedString(string: "1", attributes: readAttributes)
+            
+            let whiteSpaceString = NSAttributedString(string: " ")
+            
+            bottomString.append(whiteSpaceString)
             bottomString.append(readAttributedString)
         }
         
@@ -248,23 +358,27 @@ extension ChatViewController: MessageCellDelegate {
 // MARK: - Message Input bar Delegate
 extension ChatViewController: InputBarAccessoryViewDelegate {
     
+    
     func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
         
-        /// input text
-        let components = inputBar.inputTextView.components
-        messageInputBar.inputTextView.text = String()
+        
+//        let components = inputBar.inputTextView.components
+//        messageInputBar.inputTextView.text = String()
         messageInputBar.invalidatePlugins()
+
+        let message = Message(content: text, user: self.currentUser, kind: .text(text))
         
         // Send button activity animation
         messageInputBar.sendButton.startAnimating()
         messageInputBar.inputTextView.placeholder = "Sending..."
         DispatchQueue.global(qos: .default).async {
             // fake send request task
-            sleep(1)
+//            sleep(1)
             DispatchQueue.main.async { [weak self] in
                 self?.messageInputBar.sendButton.stopAnimating()
                 self?.messageInputBar.inputTextView.placeholder = "Aa"
-                self?.insertMessages(components)
+//                self?.insertMessages(text)
+                self?.insertMessage(message)
                 self?.messagesCollectionView.scrollToBottom(animated: true)
             }
         }
@@ -272,11 +386,11 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
     
     private func insertMessages(_ data: [Any]) {
         for component in data {
-            let user: User = SampleData.shared.currentSender
+            
             if let str = component as? String {
 //                let message = MockMessage(text: str, user: user, messageId: UUID().uuidString, date: Date())
-                let message = Message.init(text: str, user: user, messageId: UUID().uuidString, date: Date())
-                insertMessage(message)
+//                let message = Message.init(text: str, user: self.user, messageId: UUID().uuidString, date: Date())
+//                insertMessage(message)
             }
 //            else if let img = component as? UIImage {
 //                let message = MockMessage(image: img, user: user, messageId: UUID().uuidString, date: Date())

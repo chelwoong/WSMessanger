@@ -13,15 +13,15 @@ class MainTC: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let chatVC = ChatViewController()
-        chatVC.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 0)
-        
-        let chatRoomTC = ChannelTC()
-        chatVC.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 1)
-        
-        let tabBarList = [chatRoomTC, chatVC]
-        
-        viewControllers = tabBarList
+//        let chatVC = ChatViewController()
+//        chatVC.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 0)
+//        
+//        let chatRoomTC = ChannelTC()
+//        chatVC.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 1)
+//        
+//        let tabBarList = [chatRoomTC, chatVC]
+//        
+//        viewControllers = tabBarList
         
         
     }
