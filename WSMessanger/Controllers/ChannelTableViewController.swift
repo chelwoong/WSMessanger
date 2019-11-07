@@ -9,19 +9,21 @@
 import UIKit
 import Firebase
 
-class ChannelTC: UITableViewController {
+class ChannelTableViewController: UITableViewController {
     
     // MARK: - Variables
     var channels: [Channel] = []
     private let db = Firestore.firestore()
-    
+    private var channelListener: ListenerRegistration?
+    private var userData = UserData.init()
     private var currentUser: User?
     private var peerNumber: String?
-    let myId = "woongs@ttgo.com"
-    let peerId = "lanbi@naver.com"
+    var myId: String?
+    var peerId: String?
     
     private var channelReference: CollectionReference {
-        let email = myId
+        let email = myId!
+        
         return db.collection(email)
     }
     
@@ -36,13 +38,28 @@ class ChannelTC: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("viewDidLoad")
-        let userData = UserData.init()
-        print("Get User:\(userData.account), \(userData.password)")
+        
+        if let account = userData.account {
+            myId = userData.account
+        }
+        print("Get User:\(userData.account)")
+        
+//        self.myId = = userData.account
         
         self.title = "Channels"
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(addButtonTapped(sender:)))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(didTapAddButton(sender:)))
         
         self.tableView.register(ChannelCell.self, forCellReuseIdentifier: "reuseIdentifier")
+        
+        channelListener = channelReference.addSnapshotListener({ (querySnapshot, error) in
+            guard let snapshot = querySnapshot else {
+                print("Error listening for channel updates: \(error?.localizedDescription ?? "No error")")
+                return
+            }
+            snapshot.documentChanges.forEach { change in
+                self.handleDocumentChange(change)
+            }
+        })
         
         observeChannels()
         
@@ -50,11 +67,35 @@ class ChannelTC: UITableViewController {
     
     // MARK: - Functions
     
+    private func handleDocumentChange(_ change: DocumentChange) {
+        guard let channel = Channel(document: change.document) else {
+            return
+        }
+        
+        print("\(channel.id)")
+        
+//        switch change.type {
+//        case .added:
+//            //채널이 들어오면 백그라운드의 이미지를 지운다.
+////            checkBackgroundDefaultObj()
+//            addChannelToTable(channel)
+//
+//        case .modified:
+////            updateChannelInTable(channel)
+//
+//        case .removed:
+////            removeChannelFromTable(channel)
+//        }
+    }
+    
+    
+    
     func observeChannels() {
         
 //        let docRef = db.collection(myId)
         
-        db.collection(myId).getDocuments { (querySnapshot, err) in
+        guard let account = myId else {return}
+        db.collection(account).getDocuments { (querySnapshot, err) in
             if let err = err {
                 print("Error getting documents: \(err)")
             } else {
@@ -71,25 +112,24 @@ class ChannelTC: UITableViewController {
         }
     }
     
-    @objc func addButtonTapped(sender: UIBarButtonItem) {
-
-        
-        
-        let newChannelRef = db.collection(myId).document()
-        var channel = Channel(name: "woongs", peerName: "lanbi", myNumber: "1234-2134", peerNumber: "010-1234-1234")
-        channel.id = newChannelRef.documentID
-        
-        newChannelRef.setData(
-                channel.dictionary
-        ) { (err) in
-            if let err = err {
-                print("Error writing document: \(err)")
-            } else {
-                print("Document successfully written!")
-                self.channels.append(channel)
-                self.tableView.reloadData()
-            }
-        }
+    @objc func didTapAddButton(sender: UIBarButtonItem) {
+//        guard let account = userData.account else {return}
+//
+//        let newChannelRef = db.collection(account).document()
+//        var channel = Channel(name: user, peerName: "lanbi", myNumber: "1234-2134", peerNumber: "010-1234-1234")
+//        channel.id = newChannelRef.documentID
+//
+//        newChannelRef.setData(
+//                channel.dictionary
+//        ) { (err) in
+//            if let err = err {
+//                print("Error writing document: \(err)")
+//            } else {
+//                print("Document successfully written!")
+//                self.channels.append(channel)
+//                self.tableView.reloadData()
+//            }
+//        }
     }
 
     // MARK: - Table view data source
@@ -136,9 +176,9 @@ class ChannelTC: UITableViewController {
         let channel = channels[indexPath.row]
 //        guard let currUser =
         print("channel state: \(channel.read)")
-        let currentUser: User = .init(senderId: myId, displayName: "woongs")
-        let vc = ChatViewController(user: currentUser, channel: channel)
-    
-        self.navigationController?.pushViewController(vc, animated: true)
+//        let currentUser: User = .init(senderId: myId, displayName: "woongs")
+//        let vc = ChatViewController(user: currentUser, channel: channel)
+//
+//        self.navigationController?.pushViewController(vc, animated: true)
     }
 }

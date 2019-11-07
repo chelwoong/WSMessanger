@@ -22,6 +22,8 @@ class SignInViewController: UIViewController {
         setupTextField()
         setupKeyboard()
         
+        idTextField.text = "test@test.com"
+        passwordTextField.text = "123123"
         
     }
     
@@ -58,7 +60,7 @@ class SignInViewController: UIViewController {
                 defaults.set(email, forKey: "Account")
                 defaults.set(password, forKey: "Password")
               
-                let vc = ChannelTC()
+                let vc = MainTC()
                 vc.modalPresentationStyle = .fullScreen
                 self?.navigationController?.pushViewController(vc, animated: true)
             }
