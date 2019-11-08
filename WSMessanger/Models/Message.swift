@@ -35,21 +35,27 @@ struct Message: MessageType {
 //        self.messageId = messageId
 //    }
     
-    init(content: String, user: User, /*messageId: String,*/ kind: MessageKind) {
+    static func getDate() -> Date {
+        return Date()
+    }
+    
+    init(content: String, user: User, /*messageId: String,*/ kind: MessageKind, seq: String) {
+        self.user = user
         self.content = content
 //        self.messageId = messageId
-        self.sentDate = Date()
+        self.sentDate = Message.getDate()
         self.kind = kind
-        self.user = user
+        self.txState = "true"
+        self.sequence = seq
     }
     
     init?(document: QueryDocumentSnapshot) {
         let data = document.data()
         
         print("Data : \(data)")
-        //if let sentDate = data["created"] as? Date{
-        ////     self.sentDate = sentDate
-        // }
+//        let sentDate = data["created"] as? Date{
+//             self.sentDate = sentDate
+//         }
         guard let senderID = data["senderID"] as? String else { return nil }
         guard let senderName = data["senderName"] as? String else { return nil }
         if let state = data["txState"] as? String{
@@ -68,7 +74,12 @@ struct Message: MessageType {
         
         id = document.documentID
         user = User(senderId: senderID, displayName: senderName)
-        sentDate = data["created"] as! Date
+//        if let date = data["created"] as? Date {
+//            sentDate = date
+//        }
+        
+        let timestamp: Timestamp = data["created"] as! Timestamp
+        sentDate = timestamp.dateValue()
         if let content = data["content"] as? String {
             self.content = content
             downloadURL = nil
@@ -99,6 +110,12 @@ extension Message: DatabaseRepresentation {
             "sentDate" : sentDate
         ]
         
+        if let url = downloadURL {
+            rep["url"] = url.absoluteString
+        } else {
+            rep["content"] = content
+        }
         return rep
+        
     }
 }

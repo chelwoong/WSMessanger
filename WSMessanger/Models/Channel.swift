@@ -74,5 +74,15 @@ struct Channel {
         if let _id = data["id"] as? String { self.id = _id } else { self.id = "" }
         
     }
+}
+
+extension Channel: Comparable {
+
+    static func == (lhs: Channel, rhs: Channel) -> Bool {
+        return lhs.id == rhs.id
+    }
     
+    static func < (lhs: Channel, rhs: Channel) -> Bool {
+        return lhs.name < rhs.name
+    }
 }

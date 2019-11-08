@@ -22,8 +22,10 @@ class ContactsListViewController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = .white
         
+//        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Show IndexPath", style: .plain, target: self, action: nil)
         
         self.title = "Friends"
+        navigationController?.navigationBar.prefersLargeTitles = true
         
         setupViews()
         setupTableView()

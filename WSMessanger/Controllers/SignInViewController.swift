@@ -62,7 +62,7 @@ class SignInViewController: UIViewController {
               
                 let vc = MainTC()
                 vc.modalPresentationStyle = .fullScreen
-                self?.navigationController?.pushViewController(vc, animated: true)
+                self?.present(vc, animated: true)
             }
         }
         

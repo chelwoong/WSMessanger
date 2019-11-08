@@ -13,18 +13,18 @@ import Firebase
 
 class ChatViewController: MessagesViewController, MessagesDataSource {
     
-    // MARK: Variables
-    private let currentUser: User
+    // MARK: Properties
+    private let user: User
     private let channel: Channel
-    private let db = Firestore.firestore()
+    
+    private var messages: [Message] = []
     private var messageListener: ListenerRegistration?
     
-    var messageList: [Message] = [
-//        Message.init(text: "TESTTTTTT!", user: SampleData.shared.currentSender, messageId: UUID().uuidString, date: Date()),
-//        Message.init(text: "TESTTTTTT!", user: SampleData.shared.currentSender, messageId: UUID().uuidString, date: Date()),
-//        Message.init(text: "TESTTTTTT!", user: User(senderId: "123123", displayName: "Woongs"), messageId: UUID().uuidString, date: Date()),
-//        Message.init(text: "TESTTTTTT!", user: User(senderId: "123123", displayName: "Woongs"), messageId: UUID().uuidString, date: Date())
-    ]
+    private let db = Firestore.firestore()
+    private var refChannelDoc: DocumentReference?
+    private var refChatRoomCol: CollectionReference?
+    
+    
     
     let refreshControl = UIRefreshControl()
     
@@ -40,12 +40,11 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     
     init(user: User, channel: Channel) {
         
-        self.currentUser = user
+        self.user = user
         self.channel = channel
         
         super.init(nibName: nil, bundle: nil)
         
-        title = channel.name
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -55,35 +54,40 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        guard let id = channel.id else {
+            // 채널 id가 없으면 pop
+            navigationController?.popViewController(animated: true)
+            return
+        }
+        
+        refChannelDoc = db.collection(user.id).document(id)
+        refChatRoomCol = db.collection([user.id, id, "thread"].joined(separator: "/"))
+        
         configureMessageCollectionView()
         configureMessageInputBar()
-        getMessage()
         fetchMessages()
     }
     
     
-    // MARK: - Helpers
+    // MARK: - Functions
     
-    func getMessage() {
-        guard let channelID = channel.id else {return}
-        let ref = db.collection(currentUser.id).document(channelID).collection("thread")
-        
-        ref.getDocuments { (querySnapshot, err) in
-            if let err = err {
-                print("Error getting documents: \(err)")
-            } else {
-                for document in querySnapshot!.documents {
-                    // document.data() --> [String: Any]
-                    print("\(document.documentID) => \(document.data())")
+    //메세지 읽음 상태로 변경함수
+    private func setReadFlagTrue(){
+        DispatchQueue.main.async() {
+            self.refChannelDoc?.updateData([
+                "read" : "true" // 읽었음
+            ]) { err in
+                if let err = err {
+                    print("Error updating document: \(err)")
+                } else {
+                    print("Document successfully updated")
                 }
             }
         }
     }
     
     func fetchMessages() {
-        guard let channelID = channel.id else {return}
-        let ref = db.collection(currentUser.id).document(channelID).collection("thread")
-        messageListener = ref.addSnapshotListener { (documentSnapshot, error) in
+        messageListener = refChatRoomCol?.addSnapshotListener { (documentSnapshot, error) in
             guard let document = documentSnapshot else {
                 ("Error fetching documemnt: \(error!)")
                 return
@@ -105,7 +109,7 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         switch change.type {
         case .added:
             print(".added")
-//            insertNewMessage(message)
+            self.insertMessage(message)
             
 //        case .modified:
 //            print(".modified \(message.txState), sequence\(message.sequence)")
@@ -147,14 +151,11 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     
     private func save(_ message: Message) {
         
-        var ref: CollectionReference
-        guard let channelId = channel.id else { return }
-        ref = db.collection(currentUser.id).document(channelId).collection("thread")
+//        var ref: CollectionReference
+//        guard let channelId = channel.id else { return }
+//        ref = db.collection(user.id).document(channelId).collection("thread")
         
-        ref.addDocument(data: [
-            "content": message.content,
-            "created": Date()
-        ], completion: { (error) in
+        refChatRoomCol?.addDocument(data: message.representation, completion: { (error) in
             if let e = error {
                 print("Error sending message: \(e.localizedDescription)")
                 return
@@ -166,18 +167,36 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
             }
             self.messagesCollectionView.scrollToBottom()
         })
+        
+        
+        // 채팅방 정보 업데이트
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let lastDate = Util.getDate()
+        
+        refChannelDoc?.updateData([
+            "lastMsg": message.content,
+            "lastDate" : dateFormatter.string(from: lastDate)
+        ]) { err in
+            if let err = err {
+                print("Error updating document: \(err)")
+            } else {
+                print("Document successfully updated")
+            }
+        }
+    
     }
     
     func insertMessage(_ message: Message) {
         print("input msg: \(message.kind.self)")
         
 //        self.save(message)
-        messageList.append(message)
-        save(message)
+        messages.append(message)
+//        save(message)
         messagesCollectionView.performBatchUpdates({
-            messagesCollectionView.insertSections([messageList.count - 1])
-            if messageList.count >= 2 {
-                messagesCollectionView.reloadSections([messageList.count - 2])
+            messagesCollectionView.insertSections([messages.count - 1])
+            if messages.count >= 2 {
+                messagesCollectionView.reloadSections([messages.count - 2])
             }
         }) { [weak self] _ in
             /// scroll to bottom when last message visible
@@ -189,9 +208,9 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     
     func isLastSectionVisible() -> Bool {
         
-        guard !messageList.isEmpty else { return false }
+        guard !messages.isEmpty else { return false }
         
-        let lastIndexPath = IndexPath(item: 0, section: messageList.count - 1)
+        let lastIndexPath = IndexPath(item: 0, section: messages.count - 1)
         
         return messagesCollectionView.indexPathsForVisibleItems.contains(lastIndexPath)
     }
@@ -203,32 +222,32 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     func isPreviousMessageSameSender(at indexPath: IndexPath) -> Bool {
         guard indexPath.section - 1 >= 0 else { return false }
         
-        return messageList[indexPath.section].user == messageList[indexPath.section - 1].user
+        return messages[indexPath.section].user == messages[indexPath.section - 1].user
     }
     
     func isNextMessageSameSender(at indexPath: IndexPath) -> Bool {
-        guard indexPath.section + 1 < messageList.count else { return false }
-        return messageList[indexPath.section].user == messageList[indexPath.section + 1].user
+        guard indexPath.section + 1 < messages.count else { return false }
+        return messages[indexPath.section].user == messages[indexPath.section + 1].user
     }
     
     // MARK: - Message Datasource
     
-    //// essential for cell
+    /// essential for cell
     /// it is necessary for control the message sent
     func currentSender() -> SenderType {
-        return currentUser
+        return user
 //        return User(senderId: "asdf", displayName: "woongs")
     }
     
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
-        return messageList.count
+        return messages.count
     }
     
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
-        return messageList[indexPath.section]
+        return messages[indexPath.section]
     }
     
-    //// optional for name, date, ...
+    /// optional for name, date, ...
     ///
     /// 메세지 3개마다 날짜 표시
     func cellTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
@@ -269,7 +288,6 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
                 NSAttributedString.Key.foregroundColor: UIColor.orange
             ]
             let readAttributedString = NSAttributedString(string: "1", attributes: readAttributes)
-            
             let whiteSpaceString = NSAttributedString(string: " ")
             
             bottomString.append(whiteSpaceString)
@@ -366,8 +384,8 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
 //        messageInputBar.inputTextView.text = String()
         messageInputBar.invalidatePlugins()
 
-        let message = Message(content: text, user: self.currentUser, kind: .text(text))
-        
+        let message = Message(content: text, user: user, kind: .text(text), seq: "123456789")
+        print(message)
         // Send button activity animation
         messageInputBar.sendButton.startAnimating()
         messageInputBar.inputTextView.placeholder = "Sending..."
@@ -378,7 +396,9 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
                 self?.messageInputBar.sendButton.stopAnimating()
                 self?.messageInputBar.inputTextView.placeholder = "Aa"
 //                self?.insertMessages(text)
-                self?.insertMessage(message)
+                self?.save(message)
+//                self?.insertMessage(message)
+                inputBar.inputTextView.text = ""
                 self?.messagesCollectionView.scrollToBottom(animated: true)
             }
         }

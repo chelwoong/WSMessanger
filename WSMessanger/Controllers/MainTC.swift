@@ -13,10 +13,10 @@ class MainTC: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let friendsList = ContactsListViewController()
+        let friendsList = UINavigationController.init(rootViewController: ContactsListViewController())
         friendsList.tabBarItem = UITabBarItem(tabBarSystemItem: .contacts, tag: 0)
         
-        let chatRoomTC = ChannelTableViewController()
+        let chatRoomTC = UINavigationController.init(rootViewController: ChannelTableViewController())
         chatRoomTC.tabBarItem = UITabBarItem(tabBarSystemItem: .mostRecent, tag: 1)
         
         let tabBarList = [friendsList, chatRoomTC]
