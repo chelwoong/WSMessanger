@@ -7,27 +7,146 @@
 //
 
 import MessageKit
+import Firebase
+import FirebaseFirestore
+import RealmSwift
 
-struct Message: MessageType {
+class Message: Object, MessageType {
     
-    var messageId: String
+    @objc dynamic var id: String = ""
+    @objc dynamic var senderID: String = ""
+    @objc dynamic var content: String = ""
+    var sentDate: Date = Date()
     var sender: SenderType {
         return user
     }
-    var sentDate: Date
-    var kind: MessageKind   // text, ...
+    @objc dynamic var created: Date = Date()
+    @objc dynamic var txState: String = ""
+    @objc dynamic var sequence: String = ""
+    @objc dynamic var senderName: String = ""
     
-    var user: User
+    var kind: MessageKind = .text("")   // text, ...
+    var user: User = User(senderId: "", displayName: "")
+    var messageId: String {
+        return id
+    }
     
-    private init(kind: MessageKind, user: User, messageId: String, date: Date) {
-        self.kind = kind
+    var image: UIImage? = nil
+    var downloadURL: URL? = nil
+    
+//    private init(kind: MessageKind, user: User, messageId: String) {
+//        self.kind = kind
+//        self.user = user
+//        self.messageId = messageId
+//    }
+    
+    static func getDate() -> Date {
+        return Date()
+    }
+    
+    convenience init(content: String, user: User, /*messageId: String,*/ kind: MessageKind, seq: String) {
+        self.init()
         self.user = user
-        self.messageId = messageId
-        self.sentDate = date
+        self.senderID = user.senderId
+        self.senderName = user.displayName
+        self.content = content
+        self.sentDate = Message.getDate()
+        self.created = sentDate
+        self.kind = kind
+        self.txState = "true"
+        self.sequence = seq
     }
     
-    init(text: String, user: User, messageId: String, date: Date) {
-        self.init(kind: .text(text), user: user, messageId: messageId, date: date)
+//    convenience init(content: String, user: User, /*messageId: String,*/ kind: MessageKind, seq: String) {
+//        self.init(content: content, user: User, kind: kind, seq: seq)
+//    }
+    
+    convenience init?(document: QueryDocumentSnapshot) {
+        self.init()
+        let data = document.data()
+        
+//        print("Data : \(data)")
+//        let sentDate = data["created"] as? Date{
+//             self.sentDate = sentDate
+//         }
+        guard let _senderID = data["senderID"] as? String else { return nil }
+        guard let _senderName = data["senderName"] as? String else { return nil }
+        
+        senderID = _senderID
+        senderName = _senderName
+        
+        if let state = data["txState"] as? String {
+            txState = state
+        }
+        else{
+            txState = "success"
+        }
+        
+        if let seq = data["sequence"] as? String {
+            sequence = seq
+        }
+        else{
+            sequence = "0"
+        }
+        
+        user = User(senderId: senderID, displayName: senderName)
+//        if let date = data["created"] as? Date {
+//            sentDate = date
+//        }
+        
+        let timestamp: Timestamp = data["created"] as! Timestamp
+        sentDate = timestamp.dateValue()
+        if let content = data["content"] as? String {
+            self.content = content
+            downloadURL = nil
+        } else if let urlString = data["url"] as? String, let url = URL(string: urlString) {
+            downloadURL = url
+            content = ""
+        } else {
+            return nil
+        }
+        
+        if let text = data["content"] as? String {
+            self.kind = .text(text)
+        }
+        
+    }
+
+    override static func primaryKey() -> String? {
+        return "id"
+    }
+}
+
+// MARK: DatabaseRepresentation
+extension Message: DatabaseRepresentation {
+    
+    var representation: [String : Any] {
+        var rep: [String : Any] = [
+            "created": sentDate,
+            "senderID": sender.senderId,
+            "senderName": sender.displayName,
+            "txState" : txState,
+            "sequence" : sequence,
+//            "sentDate" : sentDate
+        ]
+        
+        if let url = downloadURL {
+            rep["url"] = url.absoluteString
+        } else {
+            rep["content"] = content
+        }
+        return rep
+        
+    }
+}
+
+extension Message: Comparable {
+    
+    static func == (lhs: Message, rhs: Message) -> Bool {
+        return lhs.senderID == rhs.senderID
     }
     
+    static func < (lhs: Message, rhs: Message) -> Bool {
+        return lhs.sentDate < rhs.sentDate
+    }
 }

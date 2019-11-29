@@ -8,14 +8,27 @@
 
 /* Begin PBXBuildFile section */
 		4C45CBF4234600A200E7332D /* CustomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C45CBF3234600A200E7332D /* CustomCell.swift */; };
+		6E10D4D12373E6BC0061A961 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E10D4D02373E6BC0061A961 /* Util.swift */; };
+		6E1B9C21234F0CBA0033CE97 /* MainTC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E1B9C20234F0CBA0033CE97 /* MainTC.swift */; };
+		6E1B9C23234F0E760033CE97 /* ChannelViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E1B9C22234F0E760033CE97 /* ChannelViewController.swift */; };
+		6E1B9C2A235435760033CE97 /* ChannelCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E1B9C29235435760033CE97 /* ChannelCell.swift */; };
+		6E3764C0237909C200F0DE7C /* UICollectionView+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764BF237909C200F0DE7C /* UICollectionView+Additions.swift */; };
+		6E3764C2237A786F00F0DE7C /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764C1237A786F00F0DE7C /* RealmManager.swift */; };
+		6E3764C6237CFA7B00F0DE7C /* NewTextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764C5237CFA7B00F0DE7C /* NewTextViewController.swift */; };
+		6E3764C8237CFBE200F0DE7C /* SMSViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764C7237CFBE200F0DE7C /* SMSViewController.swift */; };
+		6E3764CA237E4B1E00F0DE7C /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764C9237E4B1E00F0DE7C /* User.swift */; };
+		6EB28061236FB987008B1D6B /* DatabaseRepresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB28060236FB987008B1D6B /* DatabaseRepresentation.swift */; };
+		6EB2806323710546008B1D6B /* SignInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB2806223710546008B1D6B /* SignInViewController.swift */; };
+		6EB280652371058B008B1D6B /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB280642371058B008B1D6B /* UIView+Extension.swift */; };
+		6EB2809C2372BC2A008B1D6B /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB2809B2372BC2A008B1D6B /* SignUpViewController.swift */; };
+		6EB2809F2372C5BB008B1D6B /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB2809E2372C5BB008B1D6B /* UserData.swift */; };
+		6EB280A12373B21C008B1D6B /* ContactsListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB280A02373B21C008B1D6B /* ContactsListViewController.swift */; };
 		6ED7DEA02342DE97004F5B4F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DE9F2342DE97004F5B4F /* AppDelegate.swift */; };
-		6ED7DEA22342DE97004F5B4F /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DEA12342DE97004F5B4F /* MainViewController.swift */; };
 		6ED7DEA72342DE98004F5B4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6ED7DEA62342DE98004F5B4F /* Assets.xcassets */; };
 		6ED7DEAA2342DE98004F5B4F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6ED7DEA82342DE98004F5B4F /* LaunchScreen.storyboard */; };
 		6ED7DEB22342E9EC004F5B4F /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DEB12342E9EC004F5B4F /* ChatViewController.swift */; };
 		6ED7DEB42342EAB1004F5B4F /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DEB32342EAB1004F5B4F /* Message.swift */; };
 		6ED7DED623445C4B004F5B4F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6ED7DED523445C4B004F5B4F /* GoogleService-Info.plist */; };
-		6ED7DED9234485FD004F5B4F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DED8234485FD004F5B4F /* User.swift */; };
 		6ED7DEDD2344860C004F5B4F /* Channel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DEDC2344860C004F5B4F /* Channel.swift */; };
 		6ED7DEE22346E40B004F5B4F /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DEE12346E40B004F5B4F /* SampleData.swift */; };
 		6ED7DEE42346E655004F5B4F /* Lorem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED7DEE32346E655004F5B4F /* Lorem.swift */; };
@@ -28,16 +41,29 @@
 		31E8C45F03C112D5F8B2F5B1 /* Pods-WSMessanger.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WSMessanger.debug.xcconfig"; path = "Target Support Files/Pods-WSMessanger/Pods-WSMessanger.debug.xcconfig"; sourceTree = "<group>"; };
 		49BFF8C409FF735BCE07A083 /* Pods-WSMessanger.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WSMessanger.release.xcconfig"; path = "Target Support Files/Pods-WSMessanger/Pods-WSMessanger.release.xcconfig"; sourceTree = "<group>"; };
 		4C45CBF3234600A200E7332D /* CustomCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCell.swift; sourceTree = "<group>"; };
+		6E10D4D02373E6BC0061A961 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
+		6E1B9C20234F0CBA0033CE97 /* MainTC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTC.swift; sourceTree = "<group>"; };
+		6E1B9C22234F0E760033CE97 /* ChannelViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelViewController.swift; sourceTree = "<group>"; };
+		6E1B9C29235435760033CE97 /* ChannelCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelCell.swift; sourceTree = "<group>"; };
+		6E3764BF237909C200F0DE7C /* UICollectionView+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UICollectionView+Additions.swift"; sourceTree = "<group>"; };
+		6E3764C1237A786F00F0DE7C /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
+		6E3764C5237CFA7B00F0DE7C /* NewTextViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTextViewController.swift; sourceTree = "<group>"; };
+		6E3764C7237CFBE200F0DE7C /* SMSViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMSViewController.swift; sourceTree = "<group>"; };
+		6E3764C9237E4B1E00F0DE7C /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		6EB28060236FB987008B1D6B /* DatabaseRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseRepresentation.swift; sourceTree = "<group>"; };
+		6EB2806223710546008B1D6B /* SignInViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInViewController.swift; sourceTree = "<group>"; };
+		6EB280642371058B008B1D6B /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
+		6EB2809B2372BC2A008B1D6B /* SignUpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
+		6EB2809E2372C5BB008B1D6B /* UserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
+		6EB280A02373B21C008B1D6B /* ContactsListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsListViewController.swift; sourceTree = "<group>"; };
 		6ED7DE9C2342DE97004F5B4F /* WSMessanger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WSMessanger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6ED7DE9F2342DE97004F5B4F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		6ED7DEA12342DE97004F5B4F /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		6ED7DEA62342DE98004F5B4F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6ED7DEA92342DE98004F5B4F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6ED7DEAB2342DE98004F5B4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		6ED7DEB12342E9EC004F5B4F /* ChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
+		6ED7DEB12342E9EC004F5B4F /* ChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; wrapsLines = 1; };
 		6ED7DEB32342EAB1004F5B4F /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		6ED7DED523445C4B004F5B4F /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		6ED7DED8234485FD004F5B4F /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		6ED7DEDC2344860C004F5B4F /* Channel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Channel.swift; sourceTree = "<group>"; };
 		6ED7DEE12346E40B004F5B4F /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		6ED7DEE32346E655004F5B4F /* Lorem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lorem.swift; sourceTree = "<group>"; };
@@ -62,8 +88,25 @@
 			isa = PBXGroup;
 			children = (
 				4C45CBF3234600A200E7332D /* CustomCell.swift */,
+				6E1B9C29235435760033CE97 /* ChannelCell.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		6E17EC92237510C200B2F7FB /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				6E10D4D02373E6BC0061A961 /* Util.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		6E1B9C24234F25570033CE97 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				6E3764C1237A786F00F0DE7C /* RealmManager.swift */,
+			);
+			path = Managers;
 			sourceTree = "<group>";
 		};
 		6ED7DE932342DE97004F5B4F = {
@@ -87,6 +130,8 @@
 		6ED7DE9E2342DE97004F5B4F /* WSMessanger */ = {
 			isa = PBXGroup;
 			children = (
+				6E17EC92237510C200B2F7FB /* Common */,
+				6E1B9C24234F25570033CE97 /* Managers */,
 				6ED7DEE92347077C004F5B4F /* Layout */,
 				4C45CBF22346009200E7332D /* Views */,
 				6ED7DED7234485D4004F5B4F /* Models */,
@@ -106,9 +151,11 @@
 		6ED7DED7234485D4004F5B4F /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				6ED7DED8234485FD004F5B4F /* User.swift */,
 				6ED7DEB32342EAB1004F5B4F /* Message.swift */,
 				6ED7DEDC2344860C004F5B4F /* Channel.swift */,
+				6EB28060236FB987008B1D6B /* DatabaseRepresentation.swift */,
+				6EB2809E2372C5BB008B1D6B /* UserData.swift */,
+				6E3764C9237E4B1E00F0DE7C /* User.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -117,7 +164,13 @@
 			isa = PBXGroup;
 			children = (
 				6ED7DEB12342E9EC004F5B4F /* ChatViewController.swift */,
-				6ED7DEA12342DE97004F5B4F /* MainViewController.swift */,
+				6EB280A02373B21C008B1D6B /* ContactsListViewController.swift */,
+				6E1B9C20234F0CBA0033CE97 /* MainTC.swift */,
+				6E1B9C22234F0E760033CE97 /* ChannelViewController.swift */,
+				6EB2806223710546008B1D6B /* SignInViewController.swift */,
+				6EB2809B2372BC2A008B1D6B /* SignUpViewController.swift */,
+				6E3764C5237CFA7B00F0DE7C /* NewTextViewController.swift */,
+				6E3764C7237CFBE200F0DE7C /* SMSViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -126,6 +179,8 @@
 			isa = PBXGroup;
 			children = (
 				6ED7DEE72346F43C004F5B4F /* Color+Extensions.swift */,
+				6EB280642371058B008B1D6B /* UIView+Extension.swift */,
+				6E3764BF237909C200F0DE7C /* UICollectionView+Additions.swift */,
 			);
 			name = Extensions;
 			path = Extensions.temp_caseinsensitive_rename.;
@@ -271,17 +326,30 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E3764C6237CFA7B00F0DE7C /* NewTextViewController.swift in Sources */,
 				6ED7DEDD2344860C004F5B4F /* Channel.swift in Sources */,
 				6ED7DEEB23470792004F5B4F /* CustomMessageFlowLayout.swift in Sources */,
+				6E3764CA237E4B1E00F0DE7C /* User.swift in Sources */,
+				6E1B9C23234F0E760033CE97 /* ChannelViewController.swift in Sources */,
 				6ED7DEE82346F43C004F5B4F /* Color+Extensions.swift in Sources */,
-				6ED7DEA22342DE97004F5B4F /* MainViewController.swift in Sources */,
+				6E10D4D12373E6BC0061A961 /* Util.swift in Sources */,
+				6E3764C2237A786F00F0DE7C /* RealmManager.swift in Sources */,
+				6E1B9C2A235435760033CE97 /* ChannelCell.swift in Sources */,
 				6ED7DEB42342EAB1004F5B4F /* Message.swift in Sources */,
+				6EB2809C2372BC2A008B1D6B /* SignUpViewController.swift in Sources */,
 				6ED7DEB22342E9EC004F5B4F /* ChatViewController.swift in Sources */,
-				6ED7DED9234485FD004F5B4F /* User.swift in Sources */,
+				6E3764C0237909C200F0DE7C /* UICollectionView+Additions.swift in Sources */,
+				6E1B9C21234F0CBA0033CE97 /* MainTC.swift in Sources */,
 				4C45CBF4234600A200E7332D /* CustomCell.swift in Sources */,
 				6ED7DEA02342DE97004F5B4F /* AppDelegate.swift in Sources */,
+				6EB280652371058B008B1D6B /* UIView+Extension.swift in Sources */,
 				6ED7DEE42346E655004F5B4F /* Lorem.swift in Sources */,
+				6EB2806323710546008B1D6B /* SignInViewController.swift in Sources */,
+				6EB280A12373B21C008B1D6B /* ContactsListViewController.swift in Sources */,
 				6ED7DEE22346E40B004F5B4F /* SampleData.swift in Sources */,
+				6EB2809F2372C5BB008B1D6B /* UserData.swift in Sources */,
+				6E3764C8237CFBE200F0DE7C /* SMSViewController.swift in Sources */,
+				6EB28061236FB987008B1D6B /* DatabaseRepresentation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

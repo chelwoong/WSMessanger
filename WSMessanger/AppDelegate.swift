@@ -8,20 +8,26 @@
 
 import UIKit
 import Firebase
+import RealmSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
-
+    
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         FirebaseApp.configure()
         
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
-        window?.rootViewController = UINavigationController(rootViewController: MainViewController())
+//        window?.rootViewController = UINavigationController(rootViewController: SignInViewController())
+        window?.rootViewController = SignInViewController()
+        
+//        RealmManager.config.deleteRealmIfMigrationNeeded = true
+        
+//        print(Realm.Configuration.defaultConfiguration.fileURL!)
         
         return true
     }
