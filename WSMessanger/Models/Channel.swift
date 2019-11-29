@@ -8,17 +8,18 @@
 
 import Foundation
 import FirebaseFirestore
+import RealmSwift
 
-struct Channel {
+class Channel: Object {
     
-    var lastDate: String
-    var lastMsg: String
-    var id: String?
-    var myNumber: String
-    var peerNumber: String
-    var peerName: String
-    var name: String
-    var read: String
+    @objc dynamic var lastDate: String = ""
+    @objc dynamic var lastMsg: String = ""
+    @objc dynamic var id: String? = ""
+    @objc dynamic var myNumber: String = ""
+    @objc dynamic var peerNumber: String = ""
+    @objc dynamic var peerName: String = ""
+    @objc dynamic var name: String = ""
+    @objc dynamic var read: String = ""
     
     var dictionary: [String: Any] {
         
@@ -42,7 +43,8 @@ struct Channel {
     }
     
     
-    init(name: String, peerName: String, myNumber: String, peerNumber: String) {
+    convenience init(name: String, peerName: String, myNumber: String, peerNumber: String, message: String?) {
+        self.init()
         self.id = ""
         self.name = name
         self.myNumber = myNumber
@@ -56,13 +58,16 @@ struct Channel {
         
         self.lastDate = Date().description
         self.read = "true"
-        self.lastMsg = ""
+        if let msg = message {
+            self.lastMsg = msg
+        }
+        
     }
-    
-    init?(document: QueryDocumentSnapshot) {
+
+    convenience init?(document: QueryDocumentSnapshot) {
+        self.init()
         let data = document.data()
         id = document.documentID
-        print("\(id)")
         
         if let _name = data["name"] as? String { self.name = _name } else { self.name = "" }
         if let _myNumber = data["myNumber"] as? String { self.myNumber = _myNumber } else { self.myNumber = ""}
@@ -74,7 +79,30 @@ struct Channel {
         if let _id = data["id"] as? String { self.id = _id } else { self.id = "" }
         
     }
+    
 }
+
+extension Channel: DatabaseRepresentation {
+    
+    var representation: [String : Any] {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        
+        
+        var rep = ["name": name,
+                   "myNumber": myNumber,
+                   "peerNumber": peerNumber,
+                   "peerName" : peerName,
+                   "read" : read,
+                   "lastMsg" : lastMsg,
+                   "lastDate": lastDate ] as [String : Any]
+        if let id = id {
+            rep["id"] = id
+        }
+        return rep
+    }
+}
+
 
 extension Channel: Comparable {
 

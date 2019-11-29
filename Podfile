@@ -14,4 +14,5 @@ target 'WSMessanger' do
   pod 'Firebase/Storage'
   pod 'Firebase/Firestore'
 
+  pod 'RealmSwift'
 end

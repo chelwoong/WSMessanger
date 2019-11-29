@@ -10,6 +10,7 @@ import UIKit
 import MessageKit
 import InputBarAccessoryView
 import Firebase
+import RealmSwift
 
 class ChatViewController: MessagesViewController, MessagesDataSource {
     
@@ -17,6 +18,7 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     private let user: User
     private let channel: Channel
     
+    var message: Message?
     private var messages: [Message] = []
     private var messageListener: ListenerRegistration?
     
@@ -24,7 +26,8 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     private var refChannelDoc: DocumentReference?
     private var refChatRoomCol: CollectionReference?
     
-    
+    private var storedMessage:String?
+    private var storedSequence:String?
     
     let refreshControl = UIRefreshControl()
     
@@ -32,11 +35,16 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     
     let formatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
+        formatter.dateFormat = "a HH:mm"
+        formatter.locale = Locale(identifier: "ko")
         return formatter
     }()
  
     // MARK: - LifeCycle
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     init(user: User, channel: Channel) {
         
@@ -44,18 +52,25 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         self.channel = channel
         
         super.init(nibName: nil, bundle: nil)
-        
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    convenience init(user: User, channel: Channel, message: Message) {
+        self.init(user: user, channel: channel)
+        self.message = message
+    }
+    
+    // sms send init
+    convenience init(user: User, channel: Channel, msg: String?, seq: String?) {
+        self.init(user: user, channel: channel)
+        self.storedMessage = msg
+        self.storedSequence = seq
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        guard let id = channel.id else {
-            // 채널 id가 없으면 pop
+        print(channel)
+        print(channel.id)
+        guard let id = channel.id as? String else {
             navigationController?.popViewController(animated: true)
             return
         }
@@ -63,13 +78,32 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         refChannelDoc = db.collection(user.id).document(id)
         refChatRoomCol = db.collection([user.id, id, "thread"].joined(separator: "/"))
         
+        fetchMessages()
         configureMessageCollectionView()
         configureMessageInputBar()
-        fetchMessages()
+        
+        if let message = self.message {
+            self.save(message)
+        }
+        
+        if let messages = RealmManager.shared.getObjects(fileName: id, objType: Message.self) {
+            print(id, messages)
+        } else {
+            print("messages is nil")
+        }
+        
+//        let customMenuItem = UIMenuItem(title: "Quote", action: #selector(MessageCollectionViewCell.quote(:_)))
+//        UIMenuController.shared.menuItems = [customMenuItem]
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
     }
     
     
-    // MARK: - Functions
+    
+    // MARK: - Methods
     
     //메세지 읽음 상태로 변경함수
     private func setReadFlagTrue(){
@@ -102,26 +136,34 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     
     private func handleDocumentChange(_ change: DocumentChange) {
         guard let message = Message(document: change.document) else {
-            print("handleDocumentChange \(change.type)")
+            print("handleDocumentChange \(change.document)")
             return
         }
-        
+        let docID = change.document.documentID
+        message.id = docID
         switch change.type {
         case .added:
             print(".added")
             self.insertMessage(message)
-            
-//        case .modified:
-//            print(".modified \(message.txState), sequence\(message.sequence)")
+//            RealmManager.shared.saveObject(fileName: docID, object: message)
+//            print(RealmManager.shared.getObjects(fileName: docID, objType: Message.self))
+//            print(RealmManager.shared.getObjects(fileName: docID, objType: Message.self))
+
+        case .modified:
+            print(".modified \(message.txState), sequence\(message.sequence)")
 //            modifyMessage(message)
-//
-//        case .removed:
-//            print(".deleted \(message.sequence)")
-//            deleteMessage(message)
-            
+
+        case .removed:
+            print(".deleted \(message.sequence)")
+            deleteMessage(message)
+
         default:
             print(".default")
             break
+        }
+        
+        DispatchQueue.main.async {
+           self.messagesCollectionView.scrollToBottom(animated: false)
         }
     }
     
@@ -151,11 +193,8 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     
     private func save(_ message: Message) {
         
-//        var ref: CollectionReference
-//        guard let channelId = channel.id else { return }
-//        ref = db.collection(user.id).document(channelId).collection("thread")
-        
-        refChatRoomCol?.addDocument(data: message.representation, completion: { (error) in
+        var ref: DocumentReference? = nil
+        ref = refChatRoomCol?.addDocument(data: message.representation, completion: { (error) in
             if let e = error {
                 print("Error sending message: \(e.localizedDescription)")
                 return
@@ -164,7 +203,15 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
                 //문자 전송시 실패를 할 수 있어서 해당 documentID를 다 저장해준다..
                 //어딘가에다가
 //                print("document ID :  \(String(describing: ref?.documentID))")
+                guard let documentID = ref?.documentID else {return}
+                message.id = documentID
+                print("document ID : ", documentID)
+                guard let channelID = self.channel.id else {return}
+                print("channel ID : ", channelID)
+                print("in save::::::::::::::::::::::::",message)
+                RealmManager.shared.saveObject(fileName: channelID, object: message)
             }
+            
             self.messagesCollectionView.scrollToBottom()
         })
         
@@ -181,29 +228,133 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
             if let err = err {
                 print("Error updating document: \(err)")
             } else {
+                RealmManager.shared.updateObject(fileName: "channels") {
+                    self.channel.lastMsg = message.content
+                    self.channel.lastDate = dateFormatter.string(from: lastDate)
+                }
+                
                 print("Document successfully updated")
             }
         }
-    
     }
     
     func insertMessage(_ message: Message) {
-        print("input msg: \(message.kind.self)")
-        
-//        self.save(message)
+
         messages.append(message)
-//        save(message)
-        messagesCollectionView.performBatchUpdates({
-            messagesCollectionView.insertSections([messages.count - 1])
-            if messages.count >= 2 {
-                messagesCollectionView.reloadSections([messages.count - 2])
-            }
-        }) { [weak self] _ in
-            /// scroll to bottom when last message visible
-            if self?.isLastSectionVisible() == true {
-                self?.messagesCollectionView.scrollToBottom(animated: true)
+        messages.sort { (m1, m2) -> Bool in
+            m1.sentDate < m2.sentDate
+        }
+        
+        let index = messages.firstIndex(of: message)
+        let isLatestMessage = index == (messages.count - 1)
+        let shouldScrollToBottom = messagesCollectionView.isAtBottom
+        
+        messagesCollectionView.reloadData()
+
+    }
+    
+    private func deleteSMS(in indexPath:IndexPath){
+        
+        //스크롤을 bottom 으로 갈 필요가 없다.
+        let isLatestMessage = indexPath.section == (messages.count - 1)
+        //만일 마지막 메세지이면 채널방 정보다 앞 정보로 업데이트를 한다.
+        
+        //삭제 하려는게 마지막 메세지일경우 앞의 메세지를 채팅방 정보로 업데이트 수행한다.
+        //첫번째 메세지일 경우는 예외처리한다.
+        if isLatestMessage, indexPath.section != 0 {
+            let beforeIndex = indexPath.section - 1
+            let text = messages[beforeIndex].content
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            let sentDate = Util.getDate()
+            self.refChannelDoc?.updateData([
+                "lastMsg": text,
+                "lastDate" : dateFormatter.string(from: sentDate)
+            ]) { err in
+                if let err = err {
+                    print("Error updating document: \(err)")
+                } else {
+                    print("Document successfully updated")
+                }
             }
         }
+        
+        //메세지를 삭제한다.
+        let refDoc = refChatRoomCol!.document(messages[indexPath.section].id)
+        DispatchQueue.main.async() {
+            refDoc.delete()
+        }
+    }
+    
+    // 일치하는 메세지를 지움.
+    private func deleteMessage(_ message: Message) {
+        guard let index = messages.firstIndex(where: { (msg) -> Bool in
+            msg.id == message.id
+        }), let channelID = channel.id else { return }
+                
+        messages.remove(at: index)
+        var message = message
+        RealmManager.shared.deleteObject(fileName: channelID, object: &message)
+        messagesCollectionView.reloadData()
+    }
+    
+    // MARK: Helpers
+    
+    
+    override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
+        
+        if action == NSSelectorFromString("delete:") {
+            return true
+        } else {
+            return super.collectionView(collectionView, canPerformAction: action, forItemAt: indexPath, withSender: sender)
+        }
+        
+//        if action == NSSelectorFromString("delete:") {
+//            return true
+//        } else if action == NSSelectorFromString("quote:") {
+//            return true
+//        } else {
+//            return super.collectionView(collectionView, canPerformAction: action, forItemAt: indexPath, withSender: sender)
+//        }
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
+        
+        if action == NSSelectorFromString("delete:") {
+            
+            let message = messages[indexPath.item]
+            
+            showAlert {
+                print("delete, \(message)")
+                self.deleteSMS(in: indexPath)    // delete on FB
+//                self.deleteMessage(message)    // delete on messages, Realm. listener에서 처리 
+            }
+            
+        } else {
+            super.collectionView(collectionView, performAction: action, forItemAt: indexPath, withSender: sender)
+        }
+        
+//        if action == NSSelectorFromString("delete:") {
+//            print("remove")
+//        } else if action == NSSelectorFromString("quote:") {
+//            print("quote")
+//        } else {
+//            super.collectionView(collectionView, performAction: action, forItemAt: indexPath, withSender: sender)
+//        }
+    }
+    
+    func showAlert(handleDelete: @escaping () -> Void) {
+        let alert = UIAlertController(title: "Delete", message: "Are you sure?", preferredStyle: .alert)
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        let destructive = UIAlertAction(title: "Delete", style: .destructive) { (alert) in
+            handleDelete()
+        }
+        
+        alert.addAction(cancel)
+        alert.addAction(destructive)
+        
+        self.present(alert, animated: true, completion: nil)
     }
     
     func isLastSectionVisible() -> Bool {
@@ -216,7 +367,7 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     }
     
     func isTimeLabelVisible(at indexPath: IndexPath) -> Bool {
-        return indexPath.section % 3 == 0 && !isPreviousMessageSameSender(at: indexPath)
+        return indexPath.section % 5 == 0
     }
     
     func isPreviousMessageSameSender(at indexPath: IndexPath) -> Bool {
@@ -249,10 +400,15 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     
     /// optional for name, date, ...
     ///
-    /// 메세지 3개마다 날짜 표시
+    // 메세지 3개마다 날짜 표시: 가운데 날짜
     func cellTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
-        if indexPath.section % 3 == 0 {
-            return NSAttributedString(string: MessageKitDateFormatter.shared.string(from: message.sentDate), attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
+//        print(indexPath.section)
+//        if indexPath.section % 3 == 0 {
+//            return NSAttributedString(string: MessageKitDateFormatter.shared.string(from: message.sentDate), attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
+//        }
+        
+        if isTimeLabelVisible(at: indexPath) {
+            return NSAttributedString(string: MessageKitDateFormatter.shared.string(from: message.sentDate), attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 15), NSAttributedString.Key.foregroundColor: UIColor.darkGray])
         }
         return nil
     }
@@ -275,11 +431,13 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         
     }
     
+    
     /// 날짜
     func messageBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
         
         let dateString = formatter.string(from: message.sentDate)
         let bottomString = NSMutableAttributedString(string: dateString, attributes: [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .caption2)])
+//        print("\(indexPath), \(bottomString)")
         
         if !isFromCurrentSender(message: message) {
             
@@ -378,26 +536,21 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
     
     
     func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
-        
-        
 //        let components = inputBar.inputTextView.components
 //        messageInputBar.inputTextView.text = String()
-        messageInputBar.invalidatePlugins()
+//        messageInputBar.invalidatePlugins()
 
-        let message = Message(content: text, user: user, kind: .text(text), seq: "123456789")
-        print(message)
+        let sequence = Util.getSequence()
+        let message = Message(content: text, user: user, kind: .text(text), seq: sequence)
+
         // Send button activity animation
         messageInputBar.sendButton.startAnimating()
         messageInputBar.inputTextView.placeholder = "Sending..."
         DispatchQueue.global(qos: .default).async {
-            // fake send request task
-//            sleep(1)
             DispatchQueue.main.async { [weak self] in
                 self?.messageInputBar.sendButton.stopAnimating()
                 self?.messageInputBar.inputTextView.placeholder = "Aa"
-//                self?.insertMessages(text)
                 self?.save(message)
-//                self?.insertMessage(message)
                 inputBar.inputTextView.text = ""
                 self?.messagesCollectionView.scrollToBottom(animated: true)
             }
@@ -429,7 +582,7 @@ extension ChatViewController: MessagesDisplayDelegate {
     //        return .orange
     //    }
     
-    // MARK: - Text Messages
+    // MARK: Text Messages
     
     func textColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
         return isFromCurrentSender(message: message) ? .white : .darkText
@@ -446,9 +599,11 @@ extension ChatViewController: MessagesDisplayDelegate {
     //        return [.url, .address, .phoneNumber, .date, .transitInformation, .mention, .hashtag]
     //    }
     //
-    // MARK: - All Messages
+    
+    // MARK: All Messages
     
     func backgroundColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
+//        print(message, isFromCurrentSender(message: message))
         return isFromCurrentSender(message: message) ? .primaryColor : UIColor(red: 230/255, green: 230/255, blue: 230/255, alpha: 1)
     }
     
@@ -456,12 +611,11 @@ extension ChatViewController: MessagesDisplayDelegate {
     func messageStyle(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageStyle {
         
         /// 메세지 말풍선 꼬리 달기
-        
         let tail: MessageStyle.TailCorner = isFromCurrentSender(message: message) ? .bottomRight : .bottomLeft
-        if !isNextMessageSameSender(at: indexPath) {
-            return .bubbleTail(tail, .curved)
-        }
-        return .bubble
+//        if !isNextMessageSameSender(at: indexPath) {
+//            return .bubbleTail(tail, .curved)
+//        }
+        return .bubbleTail(tail, .curved)
         
     }
     
@@ -476,19 +630,27 @@ extension ChatViewController: MessagesDisplayDelegate {
     func configureAccessoryView(_ accessoryView: UIView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
         // Cells are reused, so only add a button here once. For real use you would need to
         // ensure any subviews are removed if not needed
-        accessoryView.subviews.forEach { $0.removeFromSuperview() }
-        accessoryView.backgroundColor = .clear
         
-        let shouldShow = Int.random(in: 0...10) == 0
-        guard shouldShow else { return }
+//        accessoryView.subviews.forEach { $0.removeFromSuperview() }
+//        accessoryView.backgroundColor = .clear
+//
+//        let shouldShow = Int.random(in: 0...10) == 0
+//        guard shouldShow else { return }
+//
+//        let button = UIButton(type: .infoLight)
+//        button.tintColor = .primaryColor
+//        accessoryView.addSubview(button)
+//        button.frame = accessoryView.bounds
+//        button.isUserInteractionEnabled = false // respond to accessoryView tap through `MessageCellDelegate`
+//        accessoryView.layer.cornerRadius = accessoryView.frame.height / 2
+//        accessoryView.backgroundColor = UIColor.primaryColor.withAlphaComponent(0.3)
         
-        let button = UIButton(type: .infoLight)
-        button.tintColor = .primaryColor
-        accessoryView.addSubview(button)
-        button.frame = accessoryView.bounds
-        button.isUserInteractionEnabled = false // respond to accessoryView tap through `MessageCellDelegate`
-        accessoryView.layer.cornerRadius = accessoryView.frame.height / 2
-        accessoryView.backgroundColor = UIColor.primaryColor.withAlphaComponent(0.3)
+        accessoryView.backgroundColor = .orange
+        
+        let label = UILabel()
+        label.text = "heeellllo"
+        
+        accessoryView.addSubview(label)
     }
     
     
@@ -501,15 +663,20 @@ extension ChatViewController: MessagesLayoutDelegate {
     func cellTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         
         if isTimeLabelVisible(at: indexPath) {
-            return 18
+            return 15
         }
         return 0
+        
+//        if isTimeLabelVisible(at: indexPath) {
+//            return 5
+//        }
+//        return 0
     }
     
-    // read 부분
-    //    func cellBottomLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
-    //        return 17
-    //    }
+     //read 부분
+//    func cellBottomLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
+//        return 17
+//    }
     
     //
     func messageTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
@@ -522,7 +689,36 @@ extension ChatViewController: MessagesLayoutDelegate {
     
     func messageBottomLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         //        return (!isNextMessageSameSender(at: indexPath) && isFromCurrentSender(message: message)) ? 16 : 0
-        return (!isNextMessageSameSender(at: indexPath) ? 16 : 0)
+//        return (!isNextMessageSameSender(at: indexPath) ? 16 : 0)
+        return 16
     }
     
+
+}
+
+extension MessageCollectionViewCell {
+    
+    override open func delete(_ sender: Any?) {
+        
+        // Get the collectionView
+        if let collectionView = self.superview as? UICollectionView {
+            // Get indexPath
+            if let indexPath = collectionView.indexPath(for: self) {
+                // Trigger action
+                collectionView.delegate?.collectionView?(collectionView, performAction: NSSelectorFromString("delete:"), forItemAt: indexPath, withSender: sender)
+            }
+        }
+    }
+    
+//    @objc func quote(_ sender: Any?) {
+//
+//        // Get the collectionView
+//        if let collectionView = self.superview as? UICollectionView {
+//            // Get indexPath
+//            if let indexPath = collectionView.indexPath(for: self) {
+//                // Trigger action
+//                collectionView.delegate?.collectionView?(collectionView, performAction: #selector(MessageCollectionViewCell.quote(_:)), forItemAt: indexPath, withSender: sender)
+//            }
+//        }
+//    }
 }

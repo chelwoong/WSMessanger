@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import RealmSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -23,6 +24,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.makeKeyAndVisible()
 //        window?.rootViewController = UINavigationController(rootViewController: SignInViewController())
         window?.rootViewController = SignInViewController()
+        
+//        RealmManager.config.deleteRealmIfMigrationNeeded = true
+        
+//        print(Realm.Configuration.defaultConfiguration.fileURL!)
         
         return true
     }

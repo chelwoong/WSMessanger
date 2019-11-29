@@ -2,7 +2,7 @@
 //  User.swift
 //  WSMessanger
 //
-//  Created by TTgo on 02/10/2019.
+//  Created by TTgo on 15/11/2019.
 //  Copyright © 2019 TTgo. All rights reserved.
 //
 
@@ -19,7 +19,7 @@ struct User: SenderType, Equatable {
     }
 
     /// The display name of a sender.
-    public let displayName: String
+    public var displayName: String
     
     // MARK: - Intializers
     public init(senderId: String, displayName: String) {

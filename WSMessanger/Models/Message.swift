@@ -9,19 +9,24 @@
 import MessageKit
 import Firebase
 import FirebaseFirestore
+import RealmSwift
 
-struct Message: MessageType {
+class Message: Object, MessageType {
     
-    var id: String = ""
+    @objc dynamic var id: String = ""
+    @objc dynamic var senderID: String = ""
+    @objc dynamic var content: String = ""
+    var sentDate: Date = Date()
     var sender: SenderType {
         return user
     }
-    var content: String = ""
-    var txState: String = ""
-    var sequence: String = ""
-    var sentDate: Date
+    @objc dynamic var created: Date = Date()
+    @objc dynamic var txState: String = ""
+    @objc dynamic var sequence: String = ""
+    @objc dynamic var senderName: String = ""
+    
     var kind: MessageKind = .text("")   // text, ...
-    var user: User
+    var user: User = User(senderId: "", displayName: "")
     var messageId: String {
         return id
     }
@@ -39,26 +44,38 @@ struct Message: MessageType {
         return Date()
     }
     
-    init(content: String, user: User, /*messageId: String,*/ kind: MessageKind, seq: String) {
+    convenience init(content: String, user: User, /*messageId: String,*/ kind: MessageKind, seq: String) {
+        self.init()
         self.user = user
+        self.senderID = user.senderId
+        self.senderName = user.displayName
         self.content = content
-//        self.messageId = messageId
         self.sentDate = Message.getDate()
+        self.created = sentDate
         self.kind = kind
         self.txState = "true"
         self.sequence = seq
     }
     
-    init?(document: QueryDocumentSnapshot) {
+//    convenience init(content: String, user: User, /*messageId: String,*/ kind: MessageKind, seq: String) {
+//        self.init(content: content, user: User, kind: kind, seq: seq)
+//    }
+    
+    convenience init?(document: QueryDocumentSnapshot) {
+        self.init()
         let data = document.data()
         
-        print("Data : \(data)")
+//        print("Data : \(data)")
 //        let sentDate = data["created"] as? Date{
 //             self.sentDate = sentDate
 //         }
-        guard let senderID = data["senderID"] as? String else { return nil }
-        guard let senderName = data["senderName"] as? String else { return nil }
-        if let state = data["txState"] as? String{
+        guard let _senderID = data["senderID"] as? String else { return nil }
+        guard let _senderName = data["senderName"] as? String else { return nil }
+        
+        senderID = _senderID
+        senderName = _senderName
+        
+        if let state = data["txState"] as? String {
             txState = state
         }
         else{
@@ -72,7 +89,6 @@ struct Message: MessageType {
             sequence = "0"
         }
         
-        id = document.documentID
         user = User(senderId: senderID, displayName: senderName)
 //        if let date = data["created"] as? Date {
 //            sentDate = date
@@ -95,9 +111,13 @@ struct Message: MessageType {
         }
         
     }
-    
+
+    override static func primaryKey() -> String? {
+        return "id"
+    }
 }
 
+// MARK: DatabaseRepresentation
 extension Message: DatabaseRepresentation {
     
     var representation: [String : Any] {
@@ -107,7 +127,7 @@ extension Message: DatabaseRepresentation {
             "senderName": sender.displayName,
             "txState" : txState,
             "sequence" : sequence,
-            "sentDate" : sentDate
+//            "sentDate" : sentDate
         ]
         
         if let url = downloadURL {
@@ -117,5 +137,16 @@ extension Message: DatabaseRepresentation {
         }
         return rep
         
+    }
+}
+
+extension Message: Comparable {
+    
+    static func == (lhs: Message, rhs: Message) -> Bool {
+        return lhs.senderID == rhs.senderID
+    }
+    
+    static func < (lhs: Message, rhs: Message) -> Bool {
+        return lhs.sentDate < rhs.sentDate
     }
 }
