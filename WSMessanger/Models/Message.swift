@@ -16,19 +16,25 @@ class Message: Object, MessageType {
     @objc dynamic var id: String = ""
     @objc dynamic var senderID: String = ""
     @objc dynamic var content: String = ""
-    var sentDate: Date = Date()
-    var sender: SenderType {
-        return user
-    }
-    @objc dynamic var created: Date = Date()
+//    @objc dynamic var created: Date = Date()
     @objc dynamic var txState: String = ""
     @objc dynamic var sequence: String = ""
     @objc dynamic var senderName: String = ""
     
+    @objc dynamic var sentDate: Date = Date()
+    var sender: SenderType {
+        get {
+            return user
+        }
+    }
+    
+    
     var kind: MessageKind = .text("")   // text, ...
     var user: User = User(senderId: "", displayName: "")
     var messageId: String {
-        return id
+        get {
+            return id
+        }
     }
     
     var image: UIImage? = nil
@@ -51,7 +57,7 @@ class Message: Object, MessageType {
         self.senderName = user.displayName
         self.content = content
         self.sentDate = Message.getDate()
-        self.created = sentDate
+//        self.created = sentDate
         self.kind = kind
         self.txState = "true"
         self.sequence = seq
@@ -60,6 +66,24 @@ class Message: Object, MessageType {
 //    convenience init(content: String, user: User, /*messageId: String,*/ kind: MessageKind, seq: String) {
 //        self.init(content: content, user: User, kind: kind, seq: seq)
 //    }
+    
+    convenience init(realmMessage message: Message) {
+        self.init()
+        print(message)
+        self.id = message.id
+        self.user = message.user
+        self.senderID = message.senderID
+        self.senderName = message.senderName
+        
+        self.user = User(senderId: message.senderID, displayName: message.senderName)
+        
+        self.content = message.content
+        self.sentDate = message.sentDate
+//        self.created = message.sentDate
+        self.kind = .text(message.content)
+        self.txState = "true"
+        self.sequence = message.sequence
+    }
     
     convenience init?(document: QueryDocumentSnapshot) {
         self.init()

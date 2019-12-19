@@ -14,7 +14,7 @@
 		6E1B9C2A235435760033CE97 /* ChannelCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E1B9C29235435760033CE97 /* ChannelCell.swift */; };
 		6E3764C0237909C200F0DE7C /* UICollectionView+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764BF237909C200F0DE7C /* UICollectionView+Additions.swift */; };
 		6E3764C2237A786F00F0DE7C /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764C1237A786F00F0DE7C /* RealmManager.swift */; };
-		6E3764C6237CFA7B00F0DE7C /* NewTextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764C5237CFA7B00F0DE7C /* NewTextViewController.swift */; };
+		6E3764C6237CFA7B00F0DE7C /* NewSMSViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764C5237CFA7B00F0DE7C /* NewSMSViewController.swift */; };
 		6E3764C8237CFBE200F0DE7C /* SMSViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764C7237CFBE200F0DE7C /* SMSViewController.swift */; };
 		6E3764CA237E4B1E00F0DE7C /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3764C9237E4B1E00F0DE7C /* User.swift */; };
 		6EB28061236FB987008B1D6B /* DatabaseRepresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB28060236FB987008B1D6B /* DatabaseRepresentation.swift */; };
@@ -47,7 +47,7 @@
 		6E1B9C29235435760033CE97 /* ChannelCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelCell.swift; sourceTree = "<group>"; };
 		6E3764BF237909C200F0DE7C /* UICollectionView+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UICollectionView+Additions.swift"; sourceTree = "<group>"; };
 		6E3764C1237A786F00F0DE7C /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
-		6E3764C5237CFA7B00F0DE7C /* NewTextViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTextViewController.swift; sourceTree = "<group>"; };
+		6E3764C5237CFA7B00F0DE7C /* NewSMSViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSMSViewController.swift; sourceTree = "<group>"; };
 		6E3764C7237CFBE200F0DE7C /* SMSViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMSViewController.swift; sourceTree = "<group>"; };
 		6E3764C9237E4B1E00F0DE7C /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		6EB28060236FB987008B1D6B /* DatabaseRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseRepresentation.swift; sourceTree = "<group>"; };
@@ -169,7 +169,7 @@
 				6E1B9C22234F0E760033CE97 /* ChannelViewController.swift */,
 				6EB2806223710546008B1D6B /* SignInViewController.swift */,
 				6EB2809B2372BC2A008B1D6B /* SignUpViewController.swift */,
-				6E3764C5237CFA7B00F0DE7C /* NewTextViewController.swift */,
+				6E3764C5237CFA7B00F0DE7C /* NewSMSViewController.swift */,
 				6E3764C7237CFBE200F0DE7C /* SMSViewController.swift */,
 			);
 			path = Controllers;
@@ -326,7 +326,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6E3764C6237CFA7B00F0DE7C /* NewTextViewController.swift in Sources */,
+				6E3764C6237CFA7B00F0DE7C /* NewSMSViewController.swift in Sources */,
 				6ED7DEDD2344860C004F5B4F /* Channel.swift in Sources */,
 				6ED7DEEB23470792004F5B4F /* CustomMessageFlowLayout.swift in Sources */,
 				6E3764CA237E4B1E00F0DE7C /* User.swift in Sources */,

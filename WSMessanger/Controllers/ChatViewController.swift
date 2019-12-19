@@ -40,7 +40,7 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         return formatter
     }()
  
-    // MARK: - LifeCycle
+    // MARK: - Initialize
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -66,11 +66,23 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         self.storedSequence = seq
     }
     
+    func printMsg(message: Message) {
+        print(
+            """
+            In print Message!!
+            \(message.sender),
+            \(message.kind),
+            \(message.sentDate),
+            \(message.messageId)
+            """
+        )
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print(channel)
-        print(channel.id)
-        guard let id = channel.id as? String else {
+        print("Channel id::: \(channel.id)")
+        guard let id = channel.id else {
             navigationController?.popViewController(animated: true)
             return
         }
@@ -78,16 +90,24 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         refChannelDoc = db.collection(user.id).document(id)
         refChatRoomCol = db.collection([user.id, id, "thread"].joined(separator: "/"))
         
-        fetchMessages()
+        
         configureMessageCollectionView()
         configureMessageInputBar()
         
+        // 새로운 SMS 체크
         if let message = self.message {
             self.save(message)
         }
         
+        // get Messages from FB
+//        fetchMessages()
+        
+        // or get data from Realm
         if let messages = RealmManager.shared.getObjects(fileName: id, objType: Message.self) {
-            print(id, messages)
+            for message in messages {
+                let msg = Message.init(realmMessage: message)
+                insertMessage(msg)
+            }
         } else {
             print("messages is nil")
         }
@@ -95,13 +115,6 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
 //        let customMenuItem = UIMenuItem(title: "Quote", action: #selector(MessageCollectionViewCell.quote(:_)))
 //        UIMenuController.shared.menuItems = [customMenuItem]
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-    }
-    
-    
     
     // MARK: - Methods
     
@@ -120,17 +133,30 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         }
     }
     
+    
+    
     func fetchMessages() {
-        messageListener = refChatRoomCol?.addSnapshotListener { (documentSnapshot, error) in
-            guard let document = documentSnapshot else {
+        
+//        messageListener = refChatRoomCol?.addSnapshotListener { (documentSnapshot, error) in
+//            guard let document = documentSnapshot else {
+//                ("Error fetching documemnt: \(error!)")
+//                return
+//            }
+//
+//            document.documentChanges.forEach { (change) in
+//                self.handleDocumentChange(change)
+//            }
+//        }
+        
+        refChatRoomCol?.getDocuments { (querySnapshot, error) in
+            guard let document = querySnapshot else {
                 ("Error fetching documemnt: \(error!)")
                 return
             }
-            
+
             document.documentChanges.forEach { (change) in
                 self.handleDocumentChange(change)
             }
-            
         }
     }
     
@@ -144,6 +170,7 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
         switch change.type {
         case .added:
             print(".added")
+//            print(type(of: message))
             self.insertMessage(message)
 //            RealmManager.shared.saveObject(fileName: docID, object: message)
 //            print(RealmManager.shared.getObjects(fileName: docID, objType: Message.self))
@@ -240,14 +267,18 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     
     func insertMessage(_ message: Message) {
 
-        messages.append(message)
-        messages.sort { (m1, m2) -> Bool in
-            m1.sentDate < m2.sentDate
-        }
+//        print("insert msg::: \(message)")
         
-        let index = messages.firstIndex(of: message)
-        let isLatestMessage = index == (messages.count - 1)
-        let shouldScrollToBottom = messagesCollectionView.isAtBottom
+        
+        printMsg(message: message)
+        messages.append(message)
+//        messages.sort { (m1, m2) -> Bool in
+//            m1.sentDate < m2.sentDate
+//        }
+//
+//        let index = messages.firstIndex(of: message)
+//        let isLatestMessage = index == (messages.count - 1)
+//        let shouldScrollToBottom = messagesCollectionView.isAtBottom
         
         messagesCollectionView.reloadData()
 
@@ -395,6 +426,7 @@ class ChatViewController: MessagesViewController, MessagesDataSource {
     }
     
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
+//        print("message for item",messages[indexPath.section])
         return messages[indexPath.section]
     }
     

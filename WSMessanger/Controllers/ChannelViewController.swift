@@ -99,28 +99,34 @@ class ChannelViewController: UIViewController, SMSVCDelegate {
             currentUser = User(senderId: account, displayName: "test")
         }
                 
-        guard let results = RealmManager.shared.getObjects(fileName: "channels", objType: Channel.self) else {return}
-//        print(results.count)
         
-        for channel in results {
-            self.channels.append(channel)
-        }
+        print(channels)
+        // MARK: Lister 제거 -> Observe로 한 번만 가져오기
         
-        channelListener = channelReference.addSnapshotListener({ (querySnapshot, error) in
-            guard let snapshot = querySnapshot else {
-                print("Error listening for channel updates: \(error?.localizedDescription ?? "No error")")
-                return
-            }
-            snapshot.documentChanges.forEach { change in
-                if change.type != .added {
-                    self.handleDocumentChange(change)
-                }
-            }
-        })
+//        channelListener = channelReference.addSnapshotListener({ (querySnapshot, error) in
+//            guard let snapshot = querySnapshot else {
+//                print("Error listening for channel updates: \(error?.localizedDescription ?? "No error")")
+//                return
+//            }
+//            snapshot.documentChanges.forEach { change in
+//                if change.type != .added {
+//                    self.handleDocumentChange(change)
+//                }
+//            }
+//        })
         
         setupViews()
         setupTableView()
-//        observeChannels()
+        
+        // FB Observe
+        observeChannels()
+        
+        // or Realm
+//        guard let results = RealmManager.shared.getObjects(fileName: "channels", objType: Channel.self) else {return}
+//        for channel in results {
+//            self.channels.append(channel)
+//        }
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -298,8 +304,7 @@ class ChannelViewController: UIViewController, SMSVCDelegate {
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
-    private func handleRealmChange() {
-        
+    func fetchChannels() {
         
     }
     
@@ -373,6 +378,7 @@ class ChannelViewController: UIViewController, SMSVCDelegate {
                     print("document: \(document.data())")
                     if let channel = Channel(document: document) {
                         self.channels.append(channel)
+                        RealmManager.shared.saveObject(fileName: "channels", object: channel)
                         DispatchQueue.main.async {
                             self.tableView.reloadData()
                         }
@@ -380,8 +386,6 @@ class ChannelViewController: UIViewController, SMSVCDelegate {
                 }
             }
         }
-        
-    
     }
     
     @objc func didTapAddButton(sender: UIBarButtonItem) {

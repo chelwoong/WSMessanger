@@ -8,7 +8,7 @@
 
 import UIKit
 
-class NewTextViewController: UIViewController {
+class NewSMSViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()

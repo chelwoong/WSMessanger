@@ -31,7 +31,7 @@ struct RealmManager {
         if let fileURL = realmConfig.fileURL {
             realmConfig.fileURL = fileURL.deletingLastPathComponent()
                 .appendingPathComponent(fileName)
-        }
+        } 
         
         do {
             let realm = try Realm(configuration: realmConfig)
